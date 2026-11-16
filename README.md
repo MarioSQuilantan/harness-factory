@@ -43,6 +43,7 @@ $HF             # interactive wizard (after onboard)
 $HF sync
 $HF doctor
 $HF install --verbose   # más detalle en la instalación; en fallos muestra stack (o HF_VERBOSE=1)
+$HF remove              # desinstalador (terminal interactiva)
 ```
 
 ### Agents and non-interactive onboard
@@ -150,6 +151,11 @@ Flujo obligatorio (sin menús interactivos si no hay TTY):
 
 5) $HF install && $HF sync && $HF doctor
 
+Desinstalar solo si el usuario lo pide:
+- Terminal interactiva: `$HF remove` (alias `desinstalar`). Menú: skills, un asistente, opt-in del catálogo, o todo el harness.
+- Sin TTY no borres nada con el menú. Usa `$HF uninstall <id>`, `$HF purge --dry-run` y, si confirma, `$HF purge` (`--with-docs` solo si pide borrar la wiki).
+- No hagas commit de esos borrados salvo que lo pida: en un repo compartido desinstala el harness para todo el equipo.
+
 Al terminar (en lenguaje claro, no en jerga):
 - Qué se guardó en el proyecto y qué carpeta usa mi herramienta (sin listar solo rutas crípticas).
 - Pídeme recargar Cursor / Claude / la herramienta que elegí.
@@ -194,9 +200,35 @@ Run `harness-factory` with no args (after onboard) for the menu, or `harness-fac
 | `catalog` | List registry skills |
 | `consult "<text>"` | Rank autoskills + stack suggestions (use `add` or `catalog add` to opt in) |
 | `add <id...>` | Opt-in registry skills when needed, then install and wire assistants |
-| `remove` / `desinstalar` | Desinstalador interactivo (skills, un asistente, catálogo, o purge completo) |
-| `uninstall <id…>` | Quita skills/agents concretos; sin ids + TTY abre el mismo menú |
-| `purge` / `uninstall --all` | Borra todo el harness (`--dry-run` vista previa; `--with-docs` incluye wiki) |
+
+### Desinstalar
+
+Desde la raíz del proyecto. El menú pide respuestas, así que hace falta una terminal real. Un agente sin TTY no debe inventar el menú: usa los comandos directos.
+
+```bash
+$HF remove          # alias: desinstalar
+$HF uninstall       # el mismo menú si hay TTY
+```
+
+| Opción del menú | Qué quita |
+|-----------------|-----------|
+| Skills cableadas | Las que marques (reglas del asistente y copia en `.rsc/skills/`) |
+| Un asistente | Cableado de Cursor, Claude, etc., y esa entrada en `.rsc.json` |
+| Opt-in del catálogo | Skills aceptadas de autoskills: disco y `catalog.selected` |
+| Todo el harness | Vista previa, confirmación, y pregunta aparte para borrar `02-DOCS/wiki` |
+
+Sin menú:
+
+```bash
+$HF uninstall dart-best-practices flutter-expert
+$HF uninstall dart-best-practices --dry-run
+$HF purge --dry-run          # solo lista
+$HF purge                    # borra el harness; conserva 02-DOCS/wiki
+$HF uninstall --all          # igual que purge
+$HF purge --with-docs        # también la wiki del harness
+```
+
+Después de un purge, recarga el asistente. Si el proyecto tiene git y esos archivos ya estaban en el historial, no hagas commit de los borrados si solo querías quitar el harness en esta máquina.
 
 ### Local skills
 
