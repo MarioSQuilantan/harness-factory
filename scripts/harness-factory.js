@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-import { loadManifest, skillsForProfile } from './lib/manifest.js';
+import { loadManifest } from './lib/manifest.js';
 import { detectTarget, installedTargets, resolveTargets, TARGETS } from '../targets/index.js';
 import { detectRepo } from './detect-repo.js';
 import { rank } from './consult.js';
@@ -35,6 +35,9 @@ import {
 } from './lib/catalog-registry.js';
 import { addCatalogSelection } from './lib/catalog-manifest.js';
 import { detectLocalSkills } from './lib/local-skills.js';
+import {
+  declaredInstallSkillIds, localOnlyInstallSkillIds, policyForProjectInstall, catalogPickerDomains,
+} from './lib/install-profiles.js';
 
 const rawArgv = process.argv.slice(2);
 // With `.rsc/.no-emoji` in the project, everything `say` prints is in words (targets/emoji-policy.mjs).
@@ -164,8 +167,7 @@ function onboardingRequired(raw, action = 'onboard') {
 
 function hasDeclaredHarness(manifest = readManifest()) {
   if (!manifest || manifest.version !== 1 || !Array.isArray(manifest.targets) || !manifest.targets.length
-    || !manifest.targets.every((target) => TARGETS.some((known) => known.id === target))
-    || !Array.isArray(manifest.skills) || !manifest.skills.length) return false;
+    || !manifest.targets.every((target) => TARGETS.some((known) => known.id === target))) return false;
   const receipt = manifest.onboarding;
   if (receipt) {
     try {
@@ -176,6 +178,7 @@ function hasDeclaredHarness(manifest = readManifest()) {
       if (receipt.maintenanceDrift && installedTargets(process.cwd()).some((target) => manifest.targets.includes(target))) return true;
     } catch { return false; }
   }
+  if (!Array.isArray(manifest.skills) || !manifest.skills.length) return false;
   // Backward compatibility is evidence-based: an actually installed pre-onboarding
   // harness keeps its maintenance commands. A hand-written or merely committed
   // declaration with no local state cannot bypass first contact.
@@ -503,16 +506,16 @@ async function recommendIds(query, { labeledOnly = false } = {}) {
 
 // Pick skills by browsing the domains, accumulating across rounds.
 // Returns the chosen skill ids, or null if the user backed out to the main menu.
-async function manualSelect() {
+async function manualSelect(domains = DOMAINS) {
   const chosen = new Set();
   for (;;) {
-    const opts = DOMAINS.map((d, i) => ({ key: String(i), label: `${d.title} (${d.ids.length})` }));
+    const opts = domains.map((d, i) => ({ key: String(i), label: `${d.title} (${d.ids.length})` }));
     opts.push({ key: 'done', label: chosen.size ? `✅ Finish & install (${chosen.size} chosen)` : 'Finish (install nothing)' });
     opts.push({ key: 'back', label: '← Back to the main menu' });
     const k = await select('\nWhich area do you want to install skills from?', opts);
     if (k === 'back' || k === null) return null;          // esc or Back → main menu
     if (k === 'done') break;
-    const d = DOMAINS[parseInt(k, 10)];
+    const d = domains[parseInt(k, 10)];
     const picked = await pickFrom(`${d.title}:`, d.ids);  // null = esc → leave this area unchanged
     if (picked) picked.forEach((id) => chosen.add(id));
     say(`   → ${chosen.size} skills chosen so far.`);
@@ -556,11 +559,10 @@ function printNextSteps(targets, ids) {
     say('        "sdd-init"   then   "I want <your idea>"');
     say('      → walks you specify → plan → tasks → implement → verify → ship.');
   }
-  say(`   ${n++}. From there, work in your own words. orient + suggest stay always-on; unslop is ready on request:`);
-  say('      orient talks in short stand-alone sentences (technical or with analogies) and draws a diagram if you do not follow;');
-  say('      suggest proposes missing skills; unslop rewrites text you send to other people.');
-  say('\n   Add something by hand anytime:    npx @ericrisco/rsc add <skill>');
-  say('   Browse the catalog / get picks:   npx @ericrisco/rsc consult "whatever you need"');
+  say(`   ${n++}. From there, work in your own words. Skills come from your repo or autoskills opt-in.`);
+  say('\n   Add local skills:                 skills/<id>/SKILL.md');
+  say('   Opt into the registry:            harness-factory catalog add <id>');
+  say('   Suggestions for your stack:       harness-factory catalog suggest');
   say('────────────────────────────────────────────────────────');
   if (targets.includes('codex')) say('   Codex: review and trust the project lifecycle hook once with `/hooks`; until then memory is reported as requiring trust.');
   if (targets.includes('deepseek')) say('   DeepSeek Harness: hooks run through rsc\'s bridge in ~/.dsh/cordis.patch.yml (one block, every profile); restart dsh once to load it.');
@@ -681,57 +683,71 @@ async function syncDeclared(targets, dry = false) {
   }
 }
 
+async function applyDeclaredInstall(targets, ids, { recordCatalog = false } = {}) {
+  if (recordCatalog && ids.length) addCatalogSelection(process.cwd(), ids);
+  if (!argv.includes('--force') && !(await guardCollisions(targets, ids))) return false;
+  const receipt = readManifest()?.onboarding;
+  const policy = policyForProjectInstall();
+  const { policy: governedPolicy, onboarding } = governedBy(receipt, ids);
+  const installPolicy = governedPolicy ? { ...governedPolicy, skills: ids } : policy;
+  for (const target of targets) {
+    await applyInstall({ skillIds: ids, target, policy: installPolicy, onboarding });
+    say(`   ✅ ${target}`);
+  }
+  return true;
+}
+
 async function wizard(flagTargets, declaredTargets = []) {
   const m = loadManifest();
+  const cwd = process.cwd();
+  const declaredIds = declaredInstallSkillIds(cwd);
+  const localIds = localOnlyInstallSkillIds(cwd);
+  const catalogDomains = catalogPickerDomains(DOMAINS);
   await banner(m.counts.skills);
-  say('  the skill catalog for your assistant (Claude Code · Codex · Cursor · Gemini · Antigravity)\n');
-  // The base set is READ from the manifest, never enumerated here: a hand-kept list in a menu
-  // label is parallel accounting (P3), and it silently starts lying the day a skill's profiles
-  // change. The exact ids are printed before the install confirmation either way.
-  const baseIds = skillsForProfile(m, 'minimal');
-  // Navigable loop: esc / "← Back" / "no" all return here instead of quitting.
+  say('  Harness Factory — BYO skills, optional autoskills registry (Claude · Codex · Cursor · Gemini · …)\n');
   for (;;) {
     const declared = readManifest();
     const choice = await select('What do you want to do?', [
-      // First, because it is what someone who already has a harness came here for nine times in ten.
-      ...(declared ? [{ key: 'update', label: `Update this project — keeps its ${declared.skills.length} skills, refreshes hooks and content` }] : []),
-      { key: 'base', label: `Base install — the essentials (${baseIds.length} skills)` },
-      { key: 'asdd', label: 'Base + Agent Spec-Driven Development (ASDD) — spec → plan → review-in-the-loop → ship' },
-      { key: 'manual', label: 'Pick skills by hand, by area' },
+      ...(declared ? [{ key: 'update', label: `Sync this project — refresh hooks and ${declared.skills.length} declared skill(s)` }] : []),
+      { key: 'declared', label: `Wire declared harness — plan policy + opt-in skills (${declaredIds.length} skill(s))` },
+      { key: 'local', label: `Install local skills only (${localIds.length} under skills/)` },
+      ...(catalogDomains.length ? [{ key: 'catalog', label: `Browse autoskills registry — opt in, then install (${m.counts.skills} available)` }] : []),
     ]);
-    if (choice === null) { say('\nOK — nothing installed. Anytime: npx @ericrisco/rsc'); return; }
-    if (choice === 'update') return syncDeclared(declaredTargets);
+    if (choice === null) { say('\nOK — nothing installed. Anytime: harness-factory onboard'); return; }
+    if (choice === 'update') return syncDeclared(declaredTargets.length ? declaredTargets : declared?.targets || []);
 
     let ids;
-    if (choice === 'base') ids = baseIds;
-    else if (choice === 'asdd') ids = skillsForProfile(m, 'core');
-    else if (choice === 'manual') {
-      const picked = await manualSelect();
-      if (picked === null) continue;          // backed out → re-show this menu
+    let recordCatalog = false;
+    if (choice === 'declared') ids = declaredIds;
+    else if (choice === 'local') ids = localIds;
+    else if (choice === 'catalog') {
+      const picked = await manualSelect(catalogDomains);
+      if (picked === null) continue;
+      if (!picked.length) {
+        say('\nNothing chosen — back to the menu.');
+        continue;
+      }
       ids = picked;
+      recordCatalog = true;
     } else continue;
 
-    // The floor is always installed: compass + detector + human-language pass.
-    ids = withDefaultSkillFloor(ids);
-    if (ids.length <= DEFAULT_SKILL_FLOOR.length && choice !== 'base') {
-      say('\nNothing chosen — back to the menu.');
+    if (!ids.length && choice !== 'declared') {
+      say('\nNothing to install — add skills under skills/ or run catalog add, then try again.');
       continue;
     }
 
     const targets = flagTargets || await selectAgents();
-    if (targets === null) continue;           // esc in the assistant picker → back to menu
-    say(`\nI'll install ${ids.length} skills for: ${targets.join(', ')}`);
-    say('   ' + ids.join(', '));
-    say('   (real files live once in .rsc/skills/ — each assistant just links to them)');
+    if (targets === null) continue;
+    const skillNote = ids.length ? ids.join(', ') : '(hooks and agents only — no catalog skills yet)';
+    say(`\nI'll wire the harness for: ${targets.join(', ')}`);
+    say(`   Skills: ${skillNote}`);
+    say('   Materialized under .rsc/skills/; assistants link to shared bases.');
     if (!(await confirm('Install it?'))) {
       say('Cancelled — back to the menu.');
-      continue;                                // "no" / esc → back to menu, not quit
+      continue;
     }
-    for (const target of targets) {
-      await applyInstall({ skillIds: ids, target });
-      say(`   ✅ ${target}`);
-    }
-    say(`\n✅ Installed ${ids.length} skills for ${targets.length} assistant(s).`);
+    if (!(await applyDeclaredInstall(targets, ids, { recordCatalog }))) continue;
+    say(`\n✅ Harness wired for ${targets.length} assistant(s) (${ids.length} skill(s)).`);
     printNextSteps(targets, ids);
     return;
   }
@@ -847,29 +863,21 @@ async function main() {
       // passing `--profile minimal` and keep believing it installed eight skills. Refused, with what
       // replaced it (P6).
       if (flag('profile')) {
-        say('⚠️  `--profile` no longer exists: rsc installs one harness — the always-on layer, the FTD lane and the SDD chain.');
-        say('    Everything else still arrives on demand: `npx @ericrisco/rsc add <id>`.');
+        say('⚠️  `--profile` is not used in Harness Factory (BYO-first).');
+        say('    Wire the harness: `harness-factory install` · local: skills/<id>/SKILL.md · registry: `catalog add <id>`.');
         return;
       }
       if (!hasDeclaredHarness()) return onboardingRequired(onboardingInput(targets));
       const without = argv.filter((a, i) => argv[i - 1] === '--without');
-      let ids = skillsForProfile(loadManifest(), 'core');
-      ids = withDefaultSkillFloor(ids).filter((id) => !without.includes(id));
+      let ids = declaredInstallSkillIds().filter((id) => !without.includes(id));
       if (!argv.includes('--force') && !(await guardCollisions(targets, ids))) return;
       const receipt = readManifest()?.onboarding;
-      // Deliberately NOT persisting the receipt here, unlike `add` above. `install --profile` REPLACES
-      // the set rather than adding to it, so writing it back would overwrite what the accepted plan
-      // declared with whatever profile was just named — measured: `install --profile minimal` after an
-      // SDD onboarding erased the SDD chain from the governed list, and the floor check then reported
-      // nothing pending. Unioning instead would leave `install` pruning to the profile while the
-      // governed list asked for more, and `sync` putting them back: churn.
-      // Now that profiles are gone this set IS the harness, so persisting it no longer overwrites a
-      // narrower accepted plan with a wider guess: they are the same set. The desync `add` had is
-      // therefore closed here too.
-      const { policy, onboarding } = governedBy(receipt, ids);
-      for (const t of targets) await applyInstall({ skillIds: ids, target: t, policy, onboarding });
+      const policy = policyForProjectInstall();
+      const { policy: governedPolicy, onboarding } = governedBy(receipt, ids);
+      const installPolicy = governedPolicy ? { ...governedPolicy, skills: ids } : policy;
+      for (const t of targets) await applyInstall({ skillIds: ids, target: t, policy: installPolicy, onboarding });
       markMaintenanceDrift('install harness');
-      say(`✅ Harness installed for ${targets.join(', ')} (${ids.length} skills)`);
+      say(`✅ Harness wired for ${targets.join(', ')} (${ids.length} skill(s))`);
       printAgentHandoff();
       return;
     }

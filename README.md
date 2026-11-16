@@ -19,9 +19,23 @@ cd /path/to/your/project
 npx harness-factory onboard
 harness-factory catalog suggest
 harness-factory catalog add vitest
+harness-factory install    # wire hooks/agents + declared local/catalog skills
+harness-factory            # interactive wizard (sync, declared wire-up, catalog browse)
 harness-factory sync
 harness-factory doctor
 ```
+
+### Install wizard (no embedded vendor profiles)
+
+Legacy rsc **`--profile minimal|core|full`** is gone. Harness Factory uses:
+
+| Mode | What it does |
+|------|----------------|
+| **Declared harness** | Hooks, agents and guards from your accepted onboard plan, plus skills under `skills/` and ids in `catalog.selected` |
+| **Local only** | Only project `skills/<id>/SKILL.md` |
+| **Catalog browse** | Pick from autoskills registry → records opt-in → installs on sync |
+
+Run `harness-factory` with no args (after onboard) for the menu, or `harness-factory install` non-interactively.
 
 ### Catalog commands
 
