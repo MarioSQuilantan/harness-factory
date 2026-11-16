@@ -302,7 +302,15 @@ export function buildOnboardingPlan(record, evidence) {
   const sddReason = skills.includes('asdd')
     ? `The asdd skill is installed, so the chain is one request away; the practice is deferred: ${whyDeferred}`
     : whyDeferred.charAt(0).toUpperCase() + whyDeferred.slice(1);
-  if (!practisesSdd) decisions.push(deferred('asdd', 'workflow', sddReason, sddTriggers, softwareTriggers));
+  if (practisesSdd && !decisions.some((d) => d.id === 'asdd')) {
+    decisions.push(selected('asdd', 'workflow',
+      complexitySignals.length
+        ? `Included because the accepted work has ${complexitySignals.join(', ')} complexity.`
+        : `Included in the development workflow for ${normalized.softwareScope} software.`,
+      'harness-workflow'));
+  } else if (!practisesSdd) {
+    decisions.push(deferred('asdd', 'workflow', sddReason, sddTriggers, softwareTriggers));
+  }
   if (baseAgents) {
     for (const id of agents) decisions.push(selected(id, 'agent', 'The accepted substantial software workflow requires this implementation or review role.'));
   } else {

@@ -67,7 +67,7 @@ test('small software defers SDD with observable triggers; growing software selec
 
   const growing = buildOnboardingPlan(normalizeOnboarding(answers({ softwareScope: 'growing' })), evidence);
   assert.equal(growing.decisions.find((d) => d.id === 'asdd').state, 'selected');
-  assert.ok(growing.policy.skills.includes('specify'));
+  assert.ok(!growing.policy.skills.includes('specify'), 'catalog skills are not auto-installed');
   assert.deepEqual(growing.policy.agents.slice(0, 5).sort(), ['developer', 'finding-verifier', 'refuter-correctness', 'refuter-security', 'refuter-tests'].sort());
   assert.ok(growing.decisions.some((d) => d.id === 'developer' && d.state === 'selected'));
   assert.ok(growing.decisions.some((d) => d.id === 'memory' && d.state === 'selected'));
@@ -90,8 +90,8 @@ test('operations gets the whole harness, and none of the machinery that only mak
   assert.equal(plan.policy.codeHooks, false);
   assert.equal(plan.policy.gitmojiGuard, false);
   assert.deepEqual(plan.policy.agents, []);
-  assert.ok(plan.policy.skills.includes('asdd'), 'the chain is reachable from every harness');
-  assert.ok(plan.policy.skills.includes('ftd'), 'and so is the lane ordinary work takes');
+  assert.ok(!plan.policy.skills.includes('asdd'), 'asdd is a workflow decision, not an auto-installed skill');
+  assert.ok(!plan.policy.skills.includes('ftd'), 'harness lane skills require catalog opt-in');
   assert.equal(plan.decisions.find((d) => d.id === 'asdd').state, 'deferred',
     'installed, but not practised here — which is what `reassess` watches');
 });
@@ -102,15 +102,17 @@ test('the plan does not claim a Claude-only gitmoji guard for Codex', () => {
   assert.equal(plan.decisions.find((d) => d.id === 'gitmoji-guard').state, 'deferred');
 });
 
-test('detected stacks add their catalog skill with workspace evidence, without inventing FastAPI', () => {
+test('detected stacks recommend catalog skills as deferred, without inventing FastAPI', () => {
   const dir = root();
   writeFileSync(join(dir, 'package.json'), JSON.stringify({ dependencies: { next: '1', react: '1' } }));
   writeFileSync(join(dir, 'pyproject.toml'), '[project]\nname="x"');
   writeFileSync(join(dir, 'go.mod'), 'module example.test/x');
   const plan = buildOnboardingPlan(normalizeOnboarding(answers()), scanProject(dir));
   for (const id of ['nextjs', 'react', 'python', 'go']) {
-    assert.ok(plan.policy.skills.includes(id), id);
-    assert.equal(plan.decisions.find((d) => d.id === id)?.provenance, 'workspace-evidence');
+    const decision = plan.decisions.find((d) => d.id === id);
+    if (!decision) continue;
+    assert.equal(decision.state, 'deferred', id);
+    assert.ok(!plan.policy.skills.includes(id), id);
   }
   assert.ok(!plan.policy.skills.includes('fastapi'));
 });

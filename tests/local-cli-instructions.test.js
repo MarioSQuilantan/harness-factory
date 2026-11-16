@@ -4,6 +4,7 @@ import { mkdtempSync, mkdirSync, writeFileSync, readFileSync, chmodSync, rmSync 
 import { join } from 'node:path';
 import { tmpdir } from 'node:os';
 import { applyInstall } from '../scripts/install-apply.js';
+import { writeLocalSkill } from './helpers/local-skill-fixture.js';
 
 const text = (root, p) => readFileSync(join(root, p), 'utf8');
 test('installed CLI is preferred in operational instructions; version pins and user permissions survive', async (t) => {
@@ -18,6 +19,8 @@ test('installed CLI is preferred in operational instructions; version pins and u
   mkdirSync(join(root, '.claude'));
   const permissions = { allow: ['Bash(git status)'], ask: ['Bash(rsc purge)'] };
   writeFileSync(join(root, '.claude/settings.json'), JSON.stringify({ permissions }));
+  writeLocalSkill(root, 'implement', '`npx @ericrisco/rsc risk`\n');
+  writeLocalSkill(root, 'suggest', 'npx @ericrisco/rsc@<catalogVersion> consult\n');
   const options = { cwd: root, target: 'claude', skillIds: ['suggest', 'implement'], policy: { baseAgents: false, memory: false, codeHooks: false } };
   await applyInstall(options);
   assert.match(text(root, '.rsc/skills/implement/SKILL.md'), /`rsc risk/);

@@ -12,8 +12,8 @@
   },
   "scripts": {
     "test": "node --test",
-    "test:ci": "node --test tests/harness-factory-catalog.test.js",
-    "coverage": "c8 --reporter=text node --test tests/harness-factory-catalog.test.js"
+    "test:ci": "node --test tests/harness-factory-catalog.test.js tests/detect-repo.test.js tests/default-skill-floor.test.js tests/harness-factory-manifest.test.js tests/manifest-file.test.js tests/onboarding.test.js tests/local-cli-instructions.test.js",
+    "coverage": "c8 --reporter=text npm run test:ci"
   },
   "dependencies": {
     "@iarna/toml": "^2.2.5",

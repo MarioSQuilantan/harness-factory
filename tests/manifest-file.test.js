@@ -5,6 +5,7 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { readManifest, writeManifest, manifestPath } from '../scripts/lib/manifest-file.js';
 import { resolveTargets, targetPaths } from '../targets/index.js';
+import { writeLocalSkill } from './helpers/local-skill-fixture.js';
 
 function tmp() { return mkdtempSync(join(tmpdir(), 'rsc-manifest-')); }
 function installed(dir, target, skills = ['orient']) {
@@ -47,7 +48,7 @@ test('round-trips the team decision, and only the team decision', () => {
 // reorders keys turns every concurrent edit into an unreadable diff.
 test('serialisation is stable and one entry per line', () => {
   const d = tmp();
-  const m = { targets: ['claude'], skills: ['b', 'a'], ownSkills: [], catalogVersion: '1', tier: 'balanced', optOuts: [] };
+  const m = { targets: ['claude'], skills: ['b', 'a'], ownSkills: [], skillsPolicy: 'byo-first', catalogVersion: '1', tier: 'balanced', optOuts: [] };
   writeManifest(d, m);
   const first = readFileSync(manifestPath(d), 'utf8');
   writeManifest(d, readManifest(d));
@@ -91,6 +92,7 @@ import { applyInstall } from '../scripts/install-apply.js';
 
 test('installing writes the manifest with the team decision', async () => {
   const d = tmp();
+  writeLocalSkill(d, 'orient');
   await applyInstall({ skillIds: ['orient'], target: 'claude', home: d, cwd: d });
   const m = readManifest(d);
   assert.deepEqual(m.targets, ['claude']);
@@ -100,6 +102,8 @@ test('installing writes the manifest with the team decision', async () => {
 
 test('installing into a second assistant merges, never replaces', async () => {
   const d = tmp();
+  writeLocalSkill(d, 'orient');
+  writeLocalSkill(d, 'unslop');
   await applyInstall({ skillIds: ['orient'], target: 'claude', home: d, cwd: d });
   await applyInstall({ skillIds: ['unslop'], target: 'codex', home: d, cwd: d });
   const m = readManifest(d);
@@ -109,6 +113,7 @@ test('installing into a second assistant merges, never replaces', async () => {
 
 test('re-installing the same thing leaves the manifest byte-identical', async () => {
   const d = tmp();
+  writeLocalSkill(d, 'orient');
   await applyInstall({ skillIds: ['orient'], target: 'claude', home: d, cwd: d });
   const before = readFileSync(manifestPath(d), 'utf8');
   await applyInstall({ skillIds: ['orient'], target: 'claude', home: d, cwd: d });
