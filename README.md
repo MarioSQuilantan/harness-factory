@@ -79,7 +79,7 @@ $HF catalog suggest
 $HF install && $HF sync && $HF doctor
 ```
 
-**BYO-first:** onboard may install **zero** catalog skills. Use `consult`, `catalog add`, `add`, or `skills/<id>/SKILL.md`. Reload the assistant session after `sync` / `install`.
+**BYO-first:** onboard may install **zero** catalog skills. Tras aceptar el plan, en modo interactivo el instalador **detecta sugerencias autoskills**, las lista y pregunta si quieres **elegir cuáles**, **instalar todas** o **ninguna** (`--skip-catalog-skills` para saltar). Reload the assistant session after `sync` / `install`.
 
 Optional snippet for `AGENTS.md` in your repo — copy so any agent follows the same rules:
 

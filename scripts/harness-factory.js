@@ -39,6 +39,7 @@ import {
 import { classifyRequestedSkillIds, catalogOptInRequired, suggestionCandidates } from './lib/skill-resolution.js';
 import { recommendForProject } from './lib/consult-recommend.js';
 import { configureInstallLog, installProgress, reportInstallFailure } from './lib/install-log.js';
+import { offerCatalogSkillInstall } from './lib/catalog-install-prompt.js';
 
 const rawArgv = process.argv.slice(2);
 configureInstallLog({ verbose: rawArgv.includes('--verbose') });
@@ -351,6 +352,16 @@ async function runOnboarding(targets) {
   for (const path of plan.replacesUserSkills || []) {
     const kept = whereKept({ cwd: process.cwd(), relPath: path });
     if (kept) say(`Your previous ${path} is kept in ${kept}`);
+  }
+  if (isInteractive() && !argv.includes('--skip-catalog-skills')) {
+    const wireTargets = plan.policy.targets?.length ? plan.policy.targets : targets;
+    await offerCatalogSkillInstall(process.cwd(), {
+      targets: wireTargets,
+      installIds: async () => {
+        await applyDeclaredInstall(wireTargets, declaredInstallSkillIds(), { recordCatalog: false });
+      },
+      say, select, pickFrom, confirm, isInteractive,
+    });
   }
   emitHarnessReadiness(plan, planId);
 }
@@ -748,7 +759,16 @@ async function wizard(flagTargets, declaredTargets = []) {
     }
     if (!(await applyDeclaredInstall(targets, ids, { recordCatalog }))) continue;
     say(`\n✅ Harness wired for ${targets.length} assistant(s) (${ids.length} skill(s)).`);
-    printNextSteps(targets, ids);
+    if (choice !== 'catalog' && isInteractive()) {
+      await offerCatalogSkillInstall(cwd, {
+        targets,
+        installIds: async () => {
+          await applyDeclaredInstall(targets, declaredInstallSkillIds(), { recordCatalog: false });
+        },
+        say, select, pickFrom, confirm, isInteractive,
+      });
+    }
+    printNextSteps(targets, declaredInstallSkillIds());
     return;
   }
 }
