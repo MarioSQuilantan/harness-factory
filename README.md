@@ -50,7 +50,7 @@ $HF remove              # desinstalador (terminal interactiva)
 
 Any tool that can run shell commands (Cursor, Claude Code, Codex, CI, etc.) can install Harness Factory the same way: **shell + Node**, not a specific LLM.
 
-1. **`--target`** picks where files are written (`cursor`, `claude`, `codex`, `copilot`, …). That is the **coding host**, not the chat model name. Several targets: `--target cursor,claude`.
+1. **`--target`** picks where files are written. That is the **coding host**, not the chat model name. Several now: `--target cursor,claude`. One that was left out can be added later; see [Agregar otra herramienta](#agregar-otra-herramienta). Do not install all of them up front.
 2. **Onboard is two steps** without a TTY: first generate the plan, then accept it with the printed plan id.
 
 ```bash
@@ -82,13 +82,48 @@ $HF install && $HF sync && $HF doctor
 
 **BYO-first:** onboard may install **zero** catalog skills. Tras aceptar el plan, en modo interactivo el instalador **detecta sugerencias autoskills**, las lista y pregunta si quieres **elegir cuáles**, **instalar todas** o **ninguna** (`--skip-catalog-skills` para saltar). Reload the assistant session after `sync` / `install`.
 
+### Agregar otra herramienta
+
+El arnés no detecta que cambiaste de aplicación. Si elegiste Cursor y luego abres Claude CLI, Claude no lee `.cursor/`. El plan y la memoria en `.rsc/` siguen ahí. Hay que cablear la herramienta nueva, sin repetir la entrevista:
+
+```bash
+$HF install --target claude
+$HF sync --target claude
+```
+
+Sustituye `claude` por el id de la tabla. Varias a la vez: `--target claude,codex`. Lo ya instalado no se borra. Recarga esa aplicación después.
+
+| Id | Herramienta | Dónde escribe | Subagentes en archivo |
+|----|-------------|-----------------|------------------------|
+| `cursor` | Cursor | `.cursor/` | sí |
+| `claude` | Claude Code | `.claude/` | sí |
+| `codex` | Codex CLI | `.codex/` y `AGENTS.md` | sí |
+| `copilot` | GitHub Copilot | `.github/` | sí |
+| `gemini` | Gemini CLI | `GEMINI.md` | sí |
+| `opencode` | OpenCode | `.opencode/` | sí |
+| `junie` | JetBrains Junie | `.junie/` | sí |
+| `kiro` | Kiro | `.kiro/` | sí |
+| `windsurf` | Windsurf | `.windsurf/` | no |
+| `cline` | Cline | `.clinerules/` | no |
+| `roo` | Roo Code | `.roo/` | no |
+| `continue` | Continue | `.continue/` | no |
+| `antigravity` | Antigravity | `.antigravity/` | no |
+| `zed` | Zed | `AGENTS.md` | no |
+| `amp` | Amp | `AGENTS.md` | no |
+| `deepseek` | DeepSeek Harness | `.dsh/` | no |
+| `pi` | Pi | `.pi/` | no |
+| `jules` | Jules | `AGENTS.md` | no |
+| `aider` | Aider | `CONVENTIONS.md` | no |
+
+En todas se escriben reglas y skills. Los subagentes (developer, verificador, refutadores) solo existen como archivo en las marcadas con «sí», y solo si el plan aceptado los eligió.
+
 Optional snippet for `AGENTS.md` in your repo — copy so any agent follows the same rules:
 
 ```markdown
 ## Harness Factory
 
 - Node >= 22.6. CLI: `npx --yes git+https://github.com/MarioSQuilantan/harness-factory.git`
-- Run from this repo root. Ask the human for `--target` (cursor, claude, codex, …).
+- Run from this repo root. Ask which host they use now (`cursor`, `claude`, `codex`, …). To add another later: `install --target <id>` then `sync --target <id>`. Do not install every host.
 - Onboard: (1) full flags → read `Plan id:`; (2) repeat with `--accept-plan <id>`.
 - Skills: local `skills/<id>/SKILL.md` or `catalog add <id> --install`. Autoskills is CC-BY-NC.
 ```
@@ -120,8 +155,8 @@ Requisitos técnicos (no los preguntes así al usuario):
 - Todos los comandos desde la raíz de este proyecto.
 
 Entrevista breve ANTES de onboard. Pregunta en español, con opciones numeradas. No muestres flags:
-1. ¿Con qué herramienta programas aquí? Cursor, Claude Code, Codex, Copilot, otra. → --target
-   Si ya estás en Cursor, sugiere cursor.
+1. ¿Con qué herramienta programas aquí ahora? Cursor, Claude Code, Codex, Copilot, u otra de la tabla del README (cursor, claude, codex, copilot, gemini, opencode, junie, kiro, windsurf, cline, roo, continue, antigravity, zed, amp, deepseek, pi, jules, aider). → --target
+   Si ya estás en Cursor, sugiere cursor. No instales las 19. Otra herramienta se agrega después con install --target <id> y sync --target <id>.
 2. ¿Qué estás construyendo? App o web, operaciones, investigación, contenido, mezcla. → --project-kind
 3. Si es software: ¿qué tan grande es ahora? Pequeño (MVP), creciendo, complejo. → --software-scope
 4. Si es software: ¿cambios directo en main, o ramas y PR? → --workflow
@@ -163,23 +198,10 @@ Desinstalar solo si el usuario lo pide:
 
 Al terminar (en lenguaje claro, no en jerga):
 - Qué se guardó en el proyecto y qué carpeta usa mi herramienta (sin listar solo rutas crípticas).
-- Pídeme recargar Cursor / Claude / la herramienta que elegí.
+- Pídeme recargar la herramienta que elegí.
+- Dime que el arnés quedó solo en esa herramienta. Si después uso otra, el comando es `$HF install --target <id>` y `$HF sync --target <id>` (claude, codex, cursor, …). No hace falta repetir el onboard.
 - doctor puede salir con código 0, "Harness health: healthy" y "Onboarding readiness: pending" si constitution.md sigue en draft. Eso es una instalación terminada: dilo, y que la constitución se completa antes del primer trabajo SDD.
 - No digas "listo" si health es unhealthy o readiness es incomplete. Explica el fallo en una frase y el siguiente comando.
-```
-
-### Prompt corto solo para ti (si prefieres responder tú)
-
-Copia esto si quieres que el agente **no te haga formulario** y use tus respuestas directas:
-
-```
-Instala Harness Factory en la raíz de este repo (git+npx del README).
-Herramienta: Cursor
-Proyecto: app de software, alcance pequeño (MVP), cambios en main
-Háblame en mezcla técnico + analogías
-Objetivo (frase exacta): "Desarrollar una app de finanzas personales"
-Sigue onboard en dos pasos, catalog si conviene, install, sync, doctor.
-Pregúntame antes de instalar skills del catálogo autoskills (licencia NC).
 ```
 
 ### Install wizard (no embedded vendor profiles)
