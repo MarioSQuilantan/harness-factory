@@ -1,71 +1,65 @@
 # Harness Factory
 
-Arnés para el repositorio en el que programas. No trae un catálogo de skills: las tuyas viven en `skills/<id>/SKILL.md`. Las del registro [autoskills](https://autoskills.sh/) solo se instalan si las aceptas. Autoskills es **CC-BY-NC-4.0**.
+A harness for the repository you code in. It ships no skill catalog: your skills live in `skills/<id>/SKILL.md`. Skills from the [autoskills](https://autoskills.sh/) registry install only after you accept them. Autoskills is **CC-BY-NC-4.0**.
 
-Hace falta **Node.js >= 22.6**. Desde la raíz de tu proyecto:
+Requires **Node.js >= 22.6**. From your project root:
 
 ```bash
 HF="npx --yes git+https://github.com/MarioSQuilantan/harness-factory.git"
 ```
 
-`--target` es la aplicación (Cursor, Claude Code, Codex…), no el modelo del chat. Puedes marcar varias: `--target cursor,claude`.
+`--target` is the app (Cursor, Claude Code, Codex…), not the chat model. You can select several: `--target cursor,claude`.
 
-## Prompt para el agente
+## Install prompt
 
-Pega este bloque en el chat del agente que tenga terminal. Pregunta en español llano y no muestres flags; tú los traduces.
+Paste this into the chat of the agent that has a terminal:
 
 ```
-Instala Harness Factory en la raíz de ESTE repo. No lo clones dentro del proyecto ni lo agregues a package.json.
-Comprueba Node >= 22.6. CLI: HF="npx --yes git+https://github.com/MarioSQuilantan/harness-factory.git"
-Todos los comandos desde esta raíz.
+Install this repository https://github.com/MarioSQuilantan/harness-factory in this project.
 
-Pregunta en español, sin mostrar flags. La primera es de varias casillas, no una sola letra.
-1. "¿Con qué herramientas programas aquí? Marca todas las que uses."
-   Casillas (marca Cursor si ya estás en Cursor): Cursor, Claude Code, Codex, Copilot, Gemini, OpenCode, Junie, Kiro, Windsurf, Cline, Roo Code, Continue, Antigravity, Zed, Amp, DeepSeek, Pi, Jules, Aider.
-   --target con las elegidas separadas por coma (cursor,claude). No instales las que no marcó.
-2. ¿Qué construyes? App o web | operaciones | investigación | contenido | mezcla. → software | operations | research | content | mixed
-3. Si es software: ¿pequeño, creciendo o complejo? → small | growing | complex
-4. Si es software: ¿directo en main, o ramas y PR? → main | branches
-5. ¿Instrucciones técnicas, con analogías, o mezcla? → technical | non-technical | mixed
-6. En una frase, ¿para qué es el proyecto? Cópiala tal cual. Se usa igual en los dos pasos.
-Resume en 3 líneas y espera un "sí".
+Always ask the interview below before any install command. Wait for the person's answers. Never fill an answer from the repo, the IDE, a README, or silence. Do not run onboard until they have answered.
 
-Luego, sin menús:
+1. First question, single choice: "Which language do you speak?" English, Spanish, Portuguese, French, or another they type. Ask every later question, and write every reply, in that language.
+2. Multi-select, not one letter: "Which tools do you use to code here? Select every one you use." Cursor, Claude Code, Codex, Copilot, Gemini, OpenCode, Junie, Kiro, Windsurf, Cline, Roo Code, Continue, Antigravity, Zed, Amp, DeepSeek, Pi, Jules, Aider. Check Cursor only if they are already in Cursor; they may add others. Map the chosen ones to --target separated by commas (cursor,claude).
+3. What are you building? App or web | operations | research | content | mixed. → software | operations | research | content | mixed
+4. If it is software: small, growing, or complex? → small | growing | complex
+5. If it is software: straight to main, or branches and PRs? → main | branches
+6. How should instructions be written: technical, with analogies, or a mix? → technical | non-technical | mixed
+7. In one sentence, what is this project for? Copy it exactly. Both onboard steps use that same sentence.
+
+Summarize the answers in 3 lines and wait for a yes. Then, from this repo root, with Node >= 22.6:
+HF="npx --yes git+https://github.com/MarioSQuilantan/harness-factory.git"
 1. $HF catalog refresh
-2. $HF onboard con --technical-level --project-kind --goal --target y, si aplica, --software-scope --workflow. Anota la línea "Plan id:".
-3. El mismo comando, mismos valores y la misma frase --goal, más --accept-plan <ese id>.
-4. $HF catalog suggest. Muéstrame la lista. Instala con $HF catalog add <id> --install solo las que yo acepte. Si dice flagged, no la instales. Avisa que autoskills es CC-BY-NC. Una skill local va en skills/<id>/SKILL.md y luego $HF add <id>.
+2. $HF onboard with --technical-level --project-kind --goal --target and, when they apply, --software-scope --workflow. Copy the "Plan id:" line.
+3. The same command, the same values, and the same --goal sentence, plus --accept-plan <that id>.
+4. $HF catalog suggest. Show the list. $HF catalog add <id> --install only what the person accepts. Do not install a flagged skill. Say that autoskills is CC-BY-NC.
 5. $HF install && $HF sync && $HF doctor
-
-Al cerrar, en lenguaje claro: qué quedó instalado, pídeme recargar esas herramientas, y di que otra se agrega después con $HF install --target <id> && $HF sync --target <id>.
-"healthy" con "Onboarding readiness: pending" es instalación terminada; la constitución en draft se completa antes del primer trabajo SDD.
-No digas "listo" si health es unhealthy o readiness es incomplete: di el fallo y el siguiente comando.
-Desinstala solo si lo pido: $HF remove en terminal, o $HF uninstall <id> / $HF purge --dry-run. No hagas commit de esos borrados.
+"healthy" with "Onboarding readiness: pending" means the install is done. Do not say "done" if health is unhealthy or readiness is incomplete.
 ```
 
-Si el fallo no se entiende, repite el comando con `--verbose` (o `HF_VERBOSE=1`).
+If a failure is unclear, rerun the command with `--verbose` (or `HF_VERBOSE=1`).
 
-## Agregar otra herramienta
+## Add another tool
 
-El arnés no detecta que cambiaste de aplicación. Lo ya instalado no se borra. Para sumar una:
+The harness does not notice that you switched apps. What is already installed stays. To add one:
 
 ```bash
 $HF install --target claude
 $HF sync --target claude
 ```
 
-Varias a la vez: `--target claude,codex`. Recarga esa aplicación después.
+Several at once: `--target claude,codex`. Reload that app afterward.
 
-| Id | Herramienta | Dónde escribe | Subagentes |
-|----|-------------|---------------|------------|
-| `cursor` | Cursor | `.cursor/` | sí |
-| `claude` | Claude Code | `.claude/` | sí |
-| `codex` | Codex CLI | `.codex/` y `AGENTS.md` | sí |
-| `copilot` | GitHub Copilot | `.github/` | sí |
-| `gemini` | Gemini CLI | `GEMINI.md` | sí |
-| `opencode` | OpenCode | `.opencode/` | sí |
-| `junie` | JetBrains Junie | `.junie/` | sí |
-| `kiro` | Kiro | `.kiro/` | sí |
+| Id | Tool | Where it writes | Subagents |
+|----|------|-----------------|-----------|
+| `cursor` | Cursor | `.cursor/` | yes |
+| `claude` | Claude Code | `.claude/` | yes |
+| `codex` | Codex CLI | `.codex/` and `AGENTS.md` | yes |
+| `copilot` | GitHub Copilot | `.github/` | yes |
+| `gemini` | Gemini CLI | `GEMINI.md` | yes |
+| `opencode` | OpenCode | `.opencode/` | yes |
+| `junie` | JetBrains Junie | `.junie/` | yes |
+| `kiro` | Kiro | `.kiro/` | yes |
 | `windsurf` | Windsurf | `.windsurf/` | no |
 | `cline` | Cline | `.clinerules/` | no |
 | `roo` | Roo Code | `.roo/` | no |
@@ -78,22 +72,22 @@ Varias a la vez: `--target claude,codex`. Recarga esa aplicación después.
 | `jules` | Jules | `AGENTS.md` | no |
 | `aider` | Aider | `CONVENTIONS.md` | no |
 
-Los subagentes (`developer`, `finding-verifier`, `refuter-correctness`, `refuter-security`, `refuter-tests`) solo se crean si el plan los eligió y la herramienta está marcada con «sí». En esa herramienta comparten un modelo. Para verlo o cambiarlo: `$HF agent-model cursor status` y `$HF agent-model cursor <modelo|inherit>`.
+Subagents (`developer`, `finding-verifier`, `refuter-correctness`, `refuter-security`, `refuter-tests`) are created only when the accepted plan selects them and the tool is marked yes. On that tool they share one model. Check or change it with `$HF agent-model cursor status` and `$HF agent-model cursor <model|inherit>`.
 
 ## Skills
 
 ```bash
 $HF catalog suggest
-$HF consult "lo que necesita el proyecto"
+$HF consult "what this project needs"
 $HF catalog add <id> --install
 $HF add <id>
 ```
 
-Una skill local en `skills/<id>/SKILL.md` gana a la del registro con el mismo id. Una skill `flagged` no se instala hasta que la aceptes.
+A local skill in `skills/<id>/SKILL.md` wins over the registry skill with the same id. A flagged skill is not installed until you accept it.
 
-## Desinstalar
+## Uninstall
 
-En una terminal real, `$HF remove` (o `desinstalar`) pregunta qué quitar: skills, un asistente, el opt-in del catálogo, o todo el arnés. Sin terminal:
+In a real terminal, `$HF remove` (alias `desinstalar`) asks what to remove: skills, one assistant, the catalog opt-in, or the whole harness. Without a terminal:
 
 ```bash
 $HF uninstall <id>
@@ -103,8 +97,8 @@ $HF purge
 $HF purge --with-docs
 ```
 
-`purge` conserva `02-DOCS/wiki` salvo que pases `--with-docs`. No hagas commit de los borrados si solo querías quitar el arnés en esta máquina.
+`purge` keeps `02-DOCS/wiki` unless you pass `--with-docs`. Do not commit the deletions if you only wanted the harness gone on this machine.
 
-## Licencia
+## License
 
-Harness Factory es **MIT** (incluye el aviso de copyright de rsc-harness). El contenido de autoskills es **CC-BY-NC-4.0**. Basado en el rsc-harness de Eric Risco. El registro de skills es de midudev/autoskills.
+Harness Factory is **MIT** (includes the rsc-harness copyright notice). Autoskills content is **CC-BY-NC-4.0**. Based on Eric Risco’s rsc-harness. The skill registry is midudev/autoskills.
