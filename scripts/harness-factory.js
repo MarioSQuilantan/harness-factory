@@ -56,22 +56,22 @@ if (['--version', '-v', 'version'].includes(rawArgv[0])) {
   const lines = [`rsc ${v.cli}`];
   if (v.installed) lines.push(`installed in this project: ${v.installed}${v.behind ? ' (behind)' : ''}`);
   else lines.push('installed in this project: none');
-  if (v.behind) lines.push('This project runs older hooks than this CLI. To catch up, run here:', '  npx @ericrisco/rsc@latest');
+  if (v.behind) lines.push('This project runs older hooks than this CLI. To catch up, run here:', '  npx --yes git+https://github.com/MarioSQuilantan/harness-factory.git');
   process.stdout.write(`${lines.join('\n')}\n`);
   process.exit(0);
 }
 const GENERAL_HELP = [
-  'Use: npx @ericrisco/rsc onboard | reassess | add <id...> | install --profile <p> | consult "<text>" | list | capabilities [--full|gap-log] | audit | registry refresh | doctor | sync | agent-model <target> <model|inherit|status> | agents [status|reset <name|--all>] | memory <on|off|status|save|resume|learn|metrics> | emoji <on|off|status> | risk [--base <ref>] [paths…] | spec gate [specs…] | review consolidate|ledger|escapes | ingest <file...> | copy check <file> | copy rules | sello <on|off|status|…> | worktrees [reap [path] [--confirm]] | backups | restore <id|latest> | upgrade | repair | uninstall <id...> | purge | help',
+  'Use: npx --yes git+https://github.com/MarioSQuilantan/harness-factory.git onboard | reassess | add <id...> | install --profile <p> | consult "<text>" | list | capabilities [--full|gap-log] | audit | registry refresh | doctor | sync | agent-model <target> <model|inherit|status> | agents [status|reset <name|--all>] | memory <on|off|status|save|resume|learn|metrics> | emoji <on|off|status> | risk [--base <ref>] [paths…] | spec gate [specs…] | review consolidate|ledger|escapes | ingest <file...> | copy check <file> | copy rules | sello <on|off|status|…> | worktrees [reap [path] [--confirm]] | backups | restore <id|latest> | upgrade | repair | uninstall <id...> | purge | help',
   'Any command takes --target <claude|codex|cursor|copilot|gemini|…> (comma-separate for several)',
   '   → without it, rsc uses the assistant already installed here; if two are, it asks instead of guessing.',
 ].join('\n');
 const UNINSTALL_HELP = [
-  'Use: npx @ericrisco/rsc uninstall <id...> [--dry-run] [--target <assistant>]',
+  'Use: npx --yes git+https://github.com/MarioSQuilantan/harness-factory.git uninstall <id...> [--dry-run] [--target <assistant>]',
   '  Removes the named skills or agents from this project.',
-  '  To remove everything rsc installed here, run: npx @ericrisco/rsc purge  (keeps 02-DOCS/ unless --with-docs)',
+  '  To remove everything rsc installed here, run: npx --yes git+https://github.com/MarioSQuilantan/harness-factory.git purge  (keeps 02-DOCS/ unless --with-docs)',
 ].join('\n');
 const PURGE_HELP = [
-  'Use: npx @ericrisco/rsc purge [--dry-run] [--with-docs]',
+  'Use: npx --yes git+https://github.com/MarioSQuilantan/harness-factory.git purge [--dry-run] [--with-docs]',
   '  Removes everything rsc installed in this project and reports what was removed, cleaned and kept.',
   '  --dry-run shows the report without touching anything. 02-DOCS/ is kept unless --with-docs.',
 ].join('\n');
@@ -152,7 +152,7 @@ function onboardingRequired(raw, action = 'onboard') {
     code: 'RSC_ONBOARDING_REQUIRED',
     schemaVersion: 1,
     missing: missingOnboardingFields(raw),
-    recovery: `Run npx @ericrisco/rsc@latest ${action} --technical-level <non-technical|mixed|technical> --project-kind <software|operations|research|content|mixed> --goal "<what you want>" --target <assistant> (software or mixed also: --software-scope <small|growing|complex> --workflow <main|branches>; any project: --emoji <on|off>, default on)`,
+    recovery: `Run npx --yes git+https://github.com/MarioSQuilantan/harness-factory.git ${action} --technical-level <non-technical|mixed|technical> --project-kind <software|operations|research|content|mixed> --goal "<what you want>" --target <assistant> (software or mixed also: --software-scope <small|growing|complex> --workflow <main|branches>; any project: --emoji <on|off>, default on)`,
     // Each value is the person's own answer, asked as a question. Never infer one from the code or
     // from a nearby answer: a field test mapped «mixto» to technical and «growing» to small.
     ask: {
@@ -239,7 +239,7 @@ function renderPlan(plan, planId) {
   // depends on the catalog of the running version: `@latest` would accept it with whatever version
   // npm resolves next, which answers RSC_PLAN_CHANGED the day a release lands in between.
   const pieces = [
-    `npx @ericrisco/rsc@${versionReport(process.cwd()).cli} onboard`,
+    `npx --yes git+https://github.com/MarioSQuilantan/harness-factory.git onboard`,
     `--technical-level ${plan.record.technicalLevel}`,
     `--project-kind ${plan.record.projectKind}`,
     `--goal-base64 ${encodeGoal(plan.record.goal)}`,
@@ -405,7 +405,7 @@ function runReassessment() {
   const manifest = readManifest();
   const plan = manifest?.onboarding?.plan;
   if (!plan) {
-    console.error('RSC_ONBOARDING_REQUIRED: no accepted onboarding receipt. Run npx @ericrisco/rsc@latest onboard');
+    console.error('RSC_ONBOARDING_REQUIRED: no accepted onboarding receipt. Run npx --yes git+https://github.com/MarioSQuilantan/harness-factory.git onboard');
     process.exitCode = 2;
     return;
   }
@@ -416,7 +416,7 @@ function runReassessment() {
   const record = recommendations[0].suggestedRecord || plan.record;
   say('Review a new plan; nothing has been installed:');
   say([
-    'npx @ericrisco/rsc@latest onboard',
+    'npx --yes git+https://github.com/MarioSQuilantan/harness-factory.git onboard',
     `--technical-level ${record.technicalLevel}`,
     `--project-kind ${record.projectKind}`,
     `--goal-base64 ${encodeGoal(record.goal)}`,
@@ -856,7 +856,7 @@ async function main() {
     } else {
       console.error(
         `rsc: ${resolved.ambiguous.join(' and ')} are both installed here, so I will not guess.\n` +
-        `     Say which one:  npx @ericrisco/rsc ${cmd} --target ${resolved.ambiguous[0]}`,
+        `     Say which one:  npx --yes git+https://github.com/MarioSQuilantan/harness-factory.git ${cmd} --target ${resolved.ambiguous[0]}`,
       );
       process.exitCode = 1;
       return;
@@ -1099,7 +1099,7 @@ async function main() {
         const { otherActiveSessions } = await import('../targets/session-memory-core.mjs');
         return void say(JSON.stringify({ isolation: existsSync(marker) ? 'off' : 'on', activeSessions: otherActiveSessions({ cwd: root }) }, null, 2));
       }
-      say(`Use: npx @ericrisco/rsc ${cmd} ${ON}|${OFF}|status`);
+      say(`Use: npx --yes git+https://github.com/MarioSQuilantan/harness-factory.git ${cmd} ${ON}|${OFF}|status`);
       process.exitCode = 2;
       return;
     }
@@ -1126,7 +1126,7 @@ async function main() {
         const { knowledgeStatus } = await import('../targets/knowledge-sync.mjs');
         return void say(JSON.stringify(knowledgeStatus(root), null, 2));
       }
-      say('Use: npx @ericrisco/rsc knowledge-sync on|off|status');
+      say('Use: npx --yes git+https://github.com/MarioSQuilantan/harness-factory.git knowledge-sync on|off|status');
       process.exitCode = 2;
       return;
     }
@@ -1140,7 +1140,7 @@ async function main() {
       const { gitPermissionsState, explainGitPermissions, GIT_PERMISSION_TARGETS } = await import('../targets/git-permissions.js');
       if (sub === 'on' || sub === 'off') {
         const current = readManifest(root);
-        if (!current) { say('No .rsc.json here: install the harness first (`npx @ericrisco/rsc onboard`).'); process.exitCode = 2; return; }
+        if (!current) { say('No .rsc.json here: install the harness first (`npx --yes git+https://github.com/MarioSQuilantan/harness-factory.git onboard`).'); process.exitCode = 2; return; }
         writeManifest(root, { ...current, gitPermissions: sub === 'on' });
         for (const t of targets) await syncInstalled({ target: t, cwd: root });
         // What rsc controls, what stops when off, and what is the assistant's own job (#298).
@@ -1158,7 +1158,7 @@ async function main() {
           notCovered: targets.filter((t) => !GIT_PERMISSION_TARGETS.includes(t)),
         }, null, 2));
       }
-      say('Use: npx @ericrisco/rsc git-permissions on|off|status [--json]');
+      say('Use: npx --yes git+https://github.com/MarioSQuilantan/harness-factory.git git-permissions on|off|status [--json]');
       process.exitCode = 2;
       return;
     }
@@ -1206,7 +1206,7 @@ async function main() {
         return void say(JSON.stringify(result, null, 2));
       }
       if (sub === 'metrics') return void say(JSON.stringify(M.metricsSummary({ cwd: root }), null, 2));
-      say('Use: npx @ericrisco/rsc memory on|off|status|save [--session id]|resume [--json]|learn --text "…" --evidence "…" --scope project|global --confidence 0..1 --approve|metrics');
+      say('Use: npx --yes git+https://github.com/MarioSQuilantan/harness-factory.git memory on|off|status|save [--session id]|resume [--json]|learn --text "…" --evidence "…" --scope project|global --confidence 0..1 --approve|metrics');
       process.exitCode = 1;
       return;
     }
@@ -1236,12 +1236,12 @@ async function main() {
       }
       if (value === 'status') return void say(JSON.stringify(describe(t), null, 2));
       if (!isValidAgentModel(value)) {
-        console.error(`rsc: '${value}' is not a model id (letters, digits and . _ : / @ + - only), nor 'inherit'.\nUse: npx @ericrisco/rsc agent-model <target> <model|inherit|status>`);
+        console.error(`rsc: '${value}' is not a model id (letters, digits and . _ : / @ + - only), nor 'inherit'.\nUse: npx --yes git+https://github.com/MarioSQuilantan/harness-factory.git agent-model <target> <model|inherit|status>`);
         process.exitCode = 2;
         return;
       }
       const current = readManifest(root);
-      if (!current) { say('No .rsc.json here: install the harness first (`npx @ericrisco/rsc onboard`).'); process.exitCode = 2; return; }
+      if (!current) { say('No .rsc.json here: install the harness first (`npx --yes git+https://github.com/MarioSQuilantan/harness-factory.git onboard`).'); process.exitCode = 2; return; }
       const next = { ...(current.agentModels || {}) };
       // `inherit` on a target whose default is inherit stores nothing: the manifest stays as small as the decision.
       if (value === AGENT_MODEL_INHERIT && targetInheritsByDefault(t)) delete next[t];
@@ -1265,7 +1265,7 @@ async function main() {
         const all = argv.includes('--all');
         const names = requestedIds(2);
         if (!all && !names.length) {
-          console.error('Use: npx @ericrisco/rsc agents reset <name...|--all> [--target <assistant>]');
+          console.error('Use: npx --yes git+https://github.com/MarioSQuilantan/harness-factory.git agents reset <name...|--all> [--target <assistant>]');
           process.exitCode = 2;
           return;
         }
@@ -1298,7 +1298,7 @@ async function main() {
           return { target: t, agents: state.agents || [], editedByYou: (state.agentsKept || []).map((k) => k.name) };
         }), null, 2));
       }
-      say('Use: npx @ericrisco/rsc agents status | agents reset <name...|--all>');
+      say('Use: npx --yes git+https://github.com/MarioSQuilantan/harness-factory.git agents status | agents reset <name...|--all>');
       process.exitCode = 2;
       return;
     }
@@ -1324,7 +1324,7 @@ async function main() {
       const dry = argv.includes('--dry-run');
       const global = argv.includes('--global');
       const result = runUpgrade({ targets, dryRun: dry, global });
-      if (result.ran) say('Upgraded global @ericrisco/rsc. Restart your shell if needed.');
+      if (result.ran) say('Upgraded global harness-factory. Restart your shell if needed.');
       else say(`${dry ? 'Would run' : 'Upgrade guide'}: ${result.plan.installCommand}`);
       say(`After upgrade: ${result.plan.syncCommand}`);
       return;
@@ -1340,12 +1340,12 @@ async function main() {
         say(JSON.stringify(registryStatus(), null, 2));
         return;
       }
-      say('Use: npx @ericrisco/rsc registry refresh | registry status');
+      say('Use: npx --yes git+https://github.com/MarioSQuilantan/harness-factory.git registry refresh | registry status');
       return;
     }
     case 'ingest': {
       // "Eat this file": into 02-DOCS/raw/, verified, then gone from where it was dropped (lib/ingest-move.js).
-      const USE = 'Use: npx @ericrisco/rsc ingest <file...> [--topic <topic>] [--keep] [--json]\n  Moves each file into 02-DOCS/raw/ (the copy is verified first, then the original is removed) and records it in 02-DOCS/wiki/.ingested.json.\n  --keep copies without removing. Project files, code and secrets are refused.';
+      const USE = 'Use: npx --yes git+https://github.com/MarioSQuilantan/harness-factory.git ingest <file...> [--topic <topic>] [--keep] [--json]\n  Moves each file into 02-DOCS/raw/ (the copy is verified first, then the original is removed) and records it in 02-DOCS/wiki/.ingested.json.\n  --keep copies without removing. Project files, code and secrets are refused.';
       const rest = argv.slice(1);
       const files = rest.filter((a, i) => !a.startsWith('--') && rest[i - 1] !== '--topic');
       if (!files.length) { say(USE); process.exitCode = 1; return; }
@@ -1367,7 +1367,7 @@ async function main() {
     case 'copy': {
       // The phrases this project forbids in what it publishes (targets/copy-rules.mjs). `check` is the
       // gate the copy skills run before delivering text; the Claude Stop hook runs the same check.
-      const USE = 'Use: npx @ericrisco/rsc copy check <file|-> [--json] | copy rules [--json]\n  Rules come from 02-DOCS/wiki/: a "Never use" / "Frases prohibidas" section, a "Never use: a, b" line, or a sentence that prohibits quoted phrases.';
+      const USE = 'Use: npx --yes git+https://github.com/MarioSQuilantan/harness-factory.git copy check <file|-> [--json] | copy rules [--json]\n  Rules come from 02-DOCS/wiki/: a "Never use" / "Frases prohibidas" section, a "Never use: a, b" line, or a sentence that prohibits quoted phrases.';
       const sub = argv[1];
       if (sub !== 'check' && sub !== 'rules') { say(USE); if (sub) process.exitCode = 1; return; }
       const { readFileSync } = await import('node:fs');
@@ -1397,7 +1397,7 @@ async function main() {
     case 'spec': {
       // `spec gate` — the specify phase's exit gate, reachable from a user project. It was only an npm
       // script inside this package, so the one check ASDD's spec depends on could not run where specs live.
-      const USE = 'Use: npx @ericrisco/rsc spec gate [spec.md ...]\n  Without paths it checks 02-DOCS/wiki/sdd/specs/ of this project. Exits 1 when a spec fails.';
+      const USE = 'Use: npx --yes git+https://github.com/MarioSQuilantan/harness-factory.git spec gate [spec.md ...]\n  Without paths it checks 02-DOCS/wiki/sdd/specs/ of this project. Exits 1 when a spec fails.';
       if (argv[1] !== 'gate') { say(USE); if (argv[1]) process.exitCode = 1; return; }
       if (argv.includes('--branch-check')) {
         const S = await import('../targets/sello.mjs');
@@ -1440,7 +1440,7 @@ async function main() {
       const policy = S.readPolicy(root, { workspace, localConfig: local, preview: argv.includes('--policy-preview') });
       const cfg = S.mergePolicyConfig(local, policy);
       const base = flag('base');
-      if (base === true) { say('Use: npx @ericrisco/rsc risk [--base <ref>] [paths…] [--json]'); process.exitCode = 1; return; }
+      if (base === true) { say('Use: npx --yes git+https://github.com/MarioSQuilantan/harness-factory.git risk [--base <ref>] [paths…] [--json]'); process.exitCode = 1; return; }
       const rest = argv.slice(1);
       // Values of value-taking flags are not paths (`--target` is global). Paths given from a
       // subdirectory are resolved against the repository root, or the table would never match them.
@@ -1469,11 +1469,11 @@ async function main() {
       // often report one defect three ways, so grouping happens here, by location and evidence, and
       // only the unique serious findings go on to `finding-verifier`, which is judgement.
       const USE = [
-        'Use: npx @ericrisco/rsc review consolidate [report.md|findings.json ...] [--json] [--window <lines>]',
+        'Use: npx --yes git+https://github.com/MarioSQuilantan/harness-factory.git review consolidate [report.md|findings.json ...] [--json] [--window <lines>]',
         '  Without files it reads stdin. Each lens report carries its findings in ```json findings blocks.',
-        '     npx @ericrisco/rsc review ledger record <findings.json> [--task <id>] | outcome <id> <fixed|false|intentional|irrelevant|parked> | round <slug>/<task> | panel <slug>/<task> --lenses a,b,c | stats [--json]',
+        '     npx --yes git+https://github.com/MarioSQuilantan/harness-factory.git review ledger record <findings.json> [--task <id>] | outcome <id> <fixed|false|intentional|irrelevant|parked> | round <slug>/<task> | panel <slug>/<task> --lenses a,b,c | stats [--json]',
         '  Findings may include criterion and lens; with a qualified --task, recurring criterion objections are reported without dismissing them. round and panel share a three-round budget.',
-        '     npx @ericrisco/rsc review escapes [--since <ref>] [--json]',
+        '     npx --yes git+https://github.com/MarioSQuilantan/harness-factory.git review escapes [--since <ref>] [--json]',
       ].join('\n');
       if (argv[1] === 'ledger' || argv[1] === 'escapes') {
         // ASDD's fix loop and the reviewer's learning, token-free (P1): rounds capped, repeats caught,
@@ -1612,8 +1612,8 @@ async function main() {
       say(`${candidates.length} worktree(s) whose work has landed:`);
       for (const c of candidates) say(W.describe(c));
       say('');
-      say('Remove the safe ones:  npx @ericrisco/rsc worktrees reap');
-      say('Remove one by name:    npx @ericrisco/rsc worktrees reap <path> [--confirm]');
+      say('Remove the safe ones:  npx --yes git+https://github.com/MarioSQuilantan/harness-factory.git worktrees reap');
+      say('Remove one by name:    npx --yes git+https://github.com/MarioSQuilantan/harness-factory.git worktrees reap <path> [--confirm]');
       return;
     }
     case 'capabilities': {
@@ -1851,7 +1851,7 @@ async function main() {
           return;
         }
         default:
-          say('Use: npx @ericrisco/rsc sello on|off [--global]|status|freeze|approve --lenses a,b [--accept-partial-lenses]|block --reason "…"|budget --lines N|budget-check [--justify "…"]|check|report');
+          say('Use: npx --yes git+https://github.com/MarioSQuilantan/harness-factory.git sello on|off [--global]|status|freeze|approve --lenses a,b [--accept-partial-lenses]|block --reason "…"|budget --lines N|budget-check [--justify "…"]|check|report');
           return;
       }
     }

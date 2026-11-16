@@ -1,5 +1,6 @@
 import { accessSync, constants, statSync, readFileSync, writeFileSync, readdirSync } from 'node:fs';
 import { join, isAbsolute } from 'node:path';
+import { HF_RUN } from './public-cli.js';
 
 // Inspect PATH, never execute a candidate just to discover it. Ignore relative PATH
 // entries: a checked-out executable is not evidence of an installed CLI.
@@ -25,7 +26,10 @@ export function installedCli({ env = process.env, platform = process.platform } 
 
 export function cliInstructions(text, local = installedCli()) {
   // Explicit versions (including @latest) are deliberate choices, never rewritten.
-  return local ? text.replace(/\bnpx[ \t]+(?:-y[ \t]+)?@ericrisco\/rsc(?=[ \t`\n]|$)/g, 'rsc') : text;
+  if (!local) return text;
+  return text
+    .replaceAll(HF_RUN, 'rsc')
+    .replace(/\bnpx[ \t]+(?:-y[ \t]+)?@ericrisco\/rsc(?=[ \t`\n]|$)/g, 'rsc');
 }
 
 export function materializeCliInstructions(dir, local) {
@@ -36,7 +40,7 @@ export function materializeCliInstructions(dir, local) {
       const before = readFileSync(file, 'utf8');
       let after = cliInstructions(before, local);
       if (local && entry.name === 'SKILL.md' && /\nname: suggest\n/.test(before)) {
-        after += '\n**Installed CLI.** Use `rsc` for unversioned `npx @ericrisco/rsc` commands, including commands suggested by hooks. Explicit package versions stay pinned. If `rsc` disappears from PATH, run sync with the declared package version to refresh these instructions. This does not grant execution permissions.\n';
+        after += '\n**Installed CLI.** Use `rsc` when it is on PATH. Otherwise run `npx --yes git+https://github.com/MarioSQuilantan/harness-factory.git`. Explicit package versions stay pinned. This does not grant execution permissions.\n';
       }
       if (after !== before) writeFileSync(file, after);
     }
