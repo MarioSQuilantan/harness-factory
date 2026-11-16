@@ -139,6 +139,16 @@ export function writeStatusPage(cwd, html) {
 }
 
 const shownMark = (cwd) => join(cwd, '.rsc', '.status-shown');
+const skillsMark = (cwd) => join(cwd, '.rsc', '.skills-answered');
+
+export function skillsAnswered(cwd = process.cwd()) {
+  return existsSync(skillsMark(cwd));
+}
+
+export function markSkillsAnswered(cwd = process.cwd()) {
+  mkdirSync(join(cwd, '.rsc'), { recursive: true });
+  if (!existsSync(skillsMark(cwd))) writeFileSync(skillsMark(cwd), `${new Date().toISOString()}\n`);
+}
 
 export function openStatusPage(file) {
   const opener = process.platform === 'darwin' ? 'open' : process.platform === 'win32' ? 'cmd' : 'xdg-open';

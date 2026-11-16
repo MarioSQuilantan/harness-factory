@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import { mkdtempSync, readFileSync, rmSync } from 'node:fs';
 import { join } from 'node:path';
 import { tmpdir } from 'node:os';
-import { collectHarnessStatus, renderStatusHtml, writeStatusPage, revealStatusOnce } from '../scripts/lib/harness-status.js';
+import { collectHarnessStatus, renderStatusHtml, writeStatusPage, revealStatusOnce, markSkillsAnswered, skillsAnswered } from '../scripts/lib/harness-status.js';
 
 test('status page reports an empty project without throwing', () => {
   const cwd = mkdtempSync(join(tmpdir(), 'hf-status-'));
@@ -20,6 +20,9 @@ test('status page reports an empty project without throwing', () => {
     const second = revealStatusOnce(cwd, { targets: [], open: false });
     assert.equal(first.opened, true);
     assert.equal(second.opened, false);
+    assert.equal(skillsAnswered(cwd), false);
+    markSkillsAnswered(cwd);
+    assert.equal(skillsAnswered(cwd), true);
   } finally {
     rmSync(cwd, { recursive: true, force: true });
   }

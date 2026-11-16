@@ -3,6 +3,7 @@ import { readManifest } from './manifest-file.js';
 import { detectLocalSkills } from './local-skills.js';
 import { addCatalogSelection } from './catalog-manifest.js';
 import { installProgress } from './install-log.js';
+import { markSkillsAnswered } from './harness-status.js';
 
 function shortReason(text, max = 72) {
   const s = String(text || '').replace(/\s+/g, ' ').trim();
@@ -58,6 +59,7 @@ export async function offerCatalogSkillInstall(cwd, {
     { key: 'skip', label: 'Ninguna ahora (más tarde: catalog add)' },
   ]);
   if (choice === 'skip' || choice === null) {
+    markSkillsAnswered(cwd);
     say('OK — no se instaló ninguna skill del catálogo.');
     return [];
   }
@@ -71,22 +73,28 @@ export async function offerCatalogSkillInstall(cwd, {
       label: `${row.id}${row.review?.status === 'flagged' ? ' ⚠' : ''} — ${shortReason(row.reason, 56)}`,
     }));
     const picked = await pickFrom('Marca las skills (espacio, o "all" en modo texto):', items);
-    if (picked === null) return [];
+    if (picked === null) {
+      markSkillsAnswered(cwd);
+      return [];
+    }
     ids = picked;
   }
 
   if (!ids.length) {
+    markSkillsAnswered(cwd);
     say('Nada seleccionado.');
     return [];
   }
 
   const flagged = ids.filter((id) => getCatalogSkillMeta(id)?.review?.status === 'flagged');
   if (flagged.length && !(await confirm(`Estas skills están flagged en el registry: ${flagged.join(', ')}. ¿Instalar igual?`))) {
+    markSkillsAnswered(cwd);
     say('Cancelado.');
     return [];
   }
 
   addCatalogSelection(cwd, ids);
+  markSkillsAnswered(cwd);
   installProgress(`autoskills: opt-in ${ids.join(', ')}`);
   if (typeof installIds === 'function') await installIds(ids);
   say(`✅ Skills del catálogo: ${ids.join(', ')}`);

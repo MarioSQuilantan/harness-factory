@@ -44,7 +44,7 @@ import {
 import { configureInstallLog, installProgress, reportInstallFailure } from './lib/install-log.js';
 import { offerCatalogSkillInstall } from './lib/catalog-install-prompt.js';
 import { runUninstallWizard } from './lib/uninstall-wizard.js';
-import { collectHarnessStatus, renderStatusHtml, writeStatusPage, openStatusPage, revealStatusOnce } from './lib/harness-status.js';
+import { collectHarnessStatus, renderStatusHtml, writeStatusPage, openStatusPage, revealStatusOnce, skillsAnswered, markSkillsAnswered } from './lib/harness-status.js';
 
 const rawArgv = process.argv.slice(2);
 configureInstallLog({ verbose: rawArgv.includes('--verbose') });
@@ -384,10 +384,6 @@ async function runOnboarding(targets) {
     });
   }
   emitHarnessReadiness(plan, planId);
-  if (isInteractive()) {
-    const shown = revealStatusOnce(process.cwd(), { targets: plan.policy.targets });
-    if (shown.opened) say(`Panel: ${shown.file}`);
-  }
 }
 
 // La única línea que afirmaba que el arnés estaba listo lo hacía sin mirar si existía: «completado»
@@ -948,8 +944,10 @@ async function main() {
       markMaintenanceDrift('install harness');
       say(`✅ Harness wired for ${targets.join(', ')} (${ids.length} skill(s))`);
       printAgentHandoff();
-      const shown = revealStatusOnce(process.cwd(), { targets });
-      if (shown.opened) say(`Panel: ${shown.file}`);
+      if (skillsAnswered(process.cwd())) {
+        const shown = revealStatusOnce(process.cwd(), { targets });
+        if (shown.opened) say(`Panel: ${shown.file}`);
+      }
       return;
     }
     case 'consult': {
@@ -978,6 +976,11 @@ async function main() {
         return;
       }
       if (sub === 'add') {
+        if (argv.includes('--skip')) {
+          markSkillsAnswered(process.cwd());
+          say('Catalog skills skipped.');
+          return;
+        }
         const ids = requestedIds(2).filter((id) => catalogSkillKnown(id));
         const unknown = requestedIds(2).filter((id) => !catalogSkillKnown(id));
         if (unknown.length) say(`unknown in autoskills registry: ${unknown.join(', ')}`);
@@ -989,6 +992,7 @@ async function main() {
           }
         }
         addCatalogSelection(process.cwd(), ids);
+        markSkillsAnswered(process.cwd());
         say(`catalog.selected: ${ids.join(', ')}`);
         if (argv.includes('--install')) {
           if (!hasDeclaredHarness()) return onboardingRequired(onboardingInput(targets));

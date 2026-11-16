@@ -38,11 +38,13 @@ $HF catalog refresh
 $HF onboard --technical-level <…> --project-kind <…> --goal "<same sentence>" --target <id,id> [--software-scope <…> --workflow <…>]
 # copy "Plan id:", then repeat the same command with --accept-plan <id>
 $HF catalog suggest
-$HF catalog add <id> --install
+# Ask which skills to install and wait for the answer before the next command.
+# Accepted ids: $HF catalog add <id> --install
+# None: $HF catalog add --skip
 $HF install && $HF sync && $HF doctor
 ```
 
-Install a catalog skill only after the person accepts it. Do not install a flagged skill. Say that autoskills is CC-BY-NC. `healthy` with `Onboarding readiness: pending` means the install is done. Do not say "done" if health is unhealthy or readiness is incomplete.
+Install a catalog skill only after the person accepts it. Do not install a flagged skill. Say that autoskills is CC-BY-NC. Do not run `install` before that answer. `install` opens the status page once, after the skills are in place. `healthy` with `Onboarding readiness: pending` means the install is done. Do not say "done" if health is unhealthy or readiness is incomplete.
 
 If a failure is unclear, rerun the command with `--verbose` (or `HF_VERBOSE=1`).
 
@@ -56,7 +58,7 @@ $HF status --open
 $HF status --json
 ```
 
-Writes `.rsc/status.html`: health, skills, flagged catalog ids, context size, memory sessions, and the model shared by each tool's subagents. The page stays on this machine. The first finished install opens it once.
+Writes `.rsc/status.html`: health, skills, flagged catalog ids, context size, memory sessions, and the model shared by each tool's subagents. The page stays on this machine. It opens by itself at the end of the first `install`, after the skill question has been answered.
 
 ## Add another tool
 
