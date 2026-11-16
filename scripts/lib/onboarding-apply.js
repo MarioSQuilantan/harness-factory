@@ -12,6 +12,7 @@ import { createBackup, restoreBackup } from './backups.js';
 import { RETIRED_SKILLS, replaceRetired } from './retired-skills.js';
 import { CONSTITUTION_PATH, constitutionIsDraft } from './constitution-draft.js';
 import { LAYER_IGNORE, TEMPLATE_SOURCE, targetName, templateAssets } from './tools-skeleton.js';
+import { installProgress, reportInstallFailure } from './install-log.js';
 
 const sameSet = (a = [], b = []) => JSON.stringify([...a].sort()) === JSON.stringify([...b].sort());
 
@@ -324,14 +325,21 @@ export async function applyAcceptedOnboarding({ cwd = process.cwd(), plan, planI
     for (const target of previousPlan?.policy?.targets || []) {
       if (!plan.policy.targets.includes(target)) removeTargetInstall({ cwd, target });
     }
+    installProgress(`onboard: plan ${planId.slice(0, 12)}… → ${plan.policy.targets.join(', ')}`);
     for (const target of plan.policy.targets) {
-      await apply({
-        cwd,
-        target,
-        skillIds: plan.policy.skills,
-        policy: plan.policy,
-        operation: 'onboard',
-      });
+      installProgress(`onboard: wiring target "${target}"`);
+      try {
+        await apply({
+          cwd,
+          target,
+          skillIds: plan.policy.skills,
+          policy: plan.policy,
+          operation: 'onboard',
+        });
+      } catch (error) {
+        reportInstallFailure(`onboarding target "${target}"`, error);
+        throw error;
+      }
     }
     pruneSharedBases({ cwd, skillIds: plan.policy.skills });
     writeOnboardingDocuments(cwd, plan, planId, previousPlan?.record || null);

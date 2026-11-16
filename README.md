@@ -42,6 +42,7 @@ $HF install    # wire hooks/agents + declared local/catalog skills
 $HF             # interactive wizard (after onboard)
 $HF sync
 $HF doctor
+$HF install --verbose   # más detalle en la instalación; en fallos muestra stack (o HF_VERBOSE=1)
 ```
 
 ### Agents and non-interactive onboard
@@ -93,24 +94,35 @@ Optional snippet for `AGENTS.md` in your repo — copy so any agent follows the 
 
 ### Prompt para el agente (copiar y pegar)
 
-Pega el bloque siguiente en el chat del **agente que ejecuta terminal en este repo** (Cursor, Claude Code, Codex, Windsurf, etc.). Sustituye solo lo que va entre `<…>`; si no sabes el target, pide al usuario **una** herramienta: `cursor`, `claude`, `codex`, `copilot`, `gemini`, u otra de la lista del CLI.
+Pega el bloque en el chat del **agente con terminal** (Cursor, Claude Code, Codex, etc.).
+
+**Regla para el agente:** pregúntame en **lenguaje cotidiano**. No uses flags (`--target`, `--project-kind`, …) en las preguntas salvo que yo pida detalle técnico. Tú traduces mis respuestas a los flags al ejecutar comandos.
+
+**Preguntas amigables (ejemplo de cómo debe sonar el agente):**
+
+| Pregunta al usuario | Opciones sencillas | Flag interno |
+|--------------------|--------------------|--------------|
+| ¿Con qué herramienta programas en **este** proyecto? | Cursor, Claude Code, Codex, Copilot, otra | `--target` |
+| ¿Qué estás construyendo? | App o web, operaciones/empresa, investigación, contenido, mezcla | `--project-kind` |
+| Si es software: ¿qué tan grande es el trabajo **ahora**? | Pequeño (MVP), creciendo, complejo/equipos | `--software-scope` |
+| Si es software: ¿cómo quieres integrar código? | Directo en main, o ramas + PR | `--workflow` |
+| ¿Cómo prefieres que te hablen las instrucciones? | Técnico, con analogías, mezcla | `--technical-level` |
+| En **una frase**, ¿para qué es este proyecto? | (texto libre — debe repetirse igual en el paso de aceptación) | `--goal` |
 
 ```
 Instala Harness Factory en ESTE repositorio (raíz del proyecto). No clones harness-factory
 como subcarpeta del app ni lo agregues como dependencia en package.json salvo que yo lo pida.
 
-Requisitos:
+Requisitos técnicos (no los preguntes así al usuario):
 - Node.js >= 22.6 (comprueba con node -v).
-- CLI desde GitHub:
-  HF="npx --yes git+https://github.com/MarioSQuilantan/harness-factory.git"
-- Ejecuta todos los comandos desde el directorio raíz de este proyecto (pwd).
+- CLI: HF="npx --yes git+https://github.com/MarioSQuilantan/harness-factory.git"
+- Todos los comandos desde la raíz de este proyecto.
 
-Antes de onboard, confirma conmigo si hace falta:
-- --target: <cursor|claude|codex|…> (host donde se cablean skills/hooks; no es el nombre del modelo).
-- --goal: "<una frase con el objetivo del proyecto>"
-- Si es software: --project-kind software --software-scope <small|growing|complex> --workflow <main|branches>
-  (si no es software: --project-kind operations|research|content|mixed y omite software-scope)
-- --technical-level <technical|non-technical|mixed>
+Entrevista breve ANTES de onboard:
+- Haz las preguntas de la tabla anterior en español claro, con opciones numeradas cuando ayude.
+- Si ya estás en Cursor, sugiere target cursor; si no estás seguro, pregunta.
+- Copia la frase del objetivo tal cual; la necesitarás dos veces (generar plan y aceptar plan).
+- Resume en 3 líneas lo que vas a configurar y pide un "sí, adelante" antes de ejecutar.
 
 Flujo obligatorio (sin menús interactivos si no hay TTY):
 
@@ -138,11 +150,25 @@ Flujo obligatorio (sin menús interactivos si no hay TTY):
 
 5) $HF install && $HF sync && $HF doctor
 
-Al terminar:
-- Resume qué se escribió (.rsc.json, .rsc/, carpetas del target).
-- Pídeme recargar/reiniciar la sesión del asistente (Cursor, Claude, etc.).
-- Si doctor muestra pending/incomplete, lista qué falta y cómo resolverlo.
-- No afirmes que el harness está listo si doctor no está healthy/ready según su salida.
+Al terminar (en lenguaje claro, no en jerga):
+- Qué se guardó en el proyecto y qué carpeta usa mi herramienta (sin listar solo rutas crípticas).
+- Pídeme recargar Cursor / Claude / la herramienta que elegí.
+- Si algo quedó pendiente, explícalo en una frase y el siguiente comando.
+- No digas "listo" si doctor no está healthy/ready.
+```
+
+### Prompt corto solo para ti (si prefieres responder tú)
+
+Copia esto si quieres que el agente **no te haga formulario** y use tus respuestas directas:
+
+```
+Instala Harness Factory en la raíz de este repo (git+npx del README).
+Herramienta: Cursor
+Proyecto: app de software, alcance pequeño (MVP), cambios en main
+Háblame en mezcla técnico + analogías
+Objetivo (frase exacta): "Desarrollar una app de finanzas personales"
+Sigue onboard en dos pasos, catalog si conviene, install, sync, doctor.
+Pregúntame antes de instalar skills del catálogo autoskills (licencia NC).
 ```
 
 ### Install wizard (no embedded vendor profiles)

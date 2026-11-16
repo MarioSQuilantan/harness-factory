@@ -38,8 +38,10 @@ import {
 } from './lib/install-profiles.js';
 import { classifyRequestedSkillIds, catalogOptInRequired, suggestionCandidates } from './lib/skill-resolution.js';
 import { recommendForProject } from './lib/consult-recommend.js';
+import { configureInstallLog, installProgress, reportInstallFailure } from './lib/install-log.js';
 
 const rawArgv = process.argv.slice(2);
+configureInstallLog({ verbose: rawArgv.includes('--verbose') });
 // With `.rsc/.no-emoji` in the project, everything `say` prints is in words (targets/emoji-policy.mjs).
 setPlainOutput(emojiOff(process.cwd()));
 
@@ -317,8 +319,11 @@ async function runOnboarding(targets) {
     return;
   }
   try {
+    installProgress('onboard: applying accepted plan…');
     await applyAcceptedOnboarding({ cwd: process.cwd(), plan, planId });
+    installProgress('onboard: plan applied');
   } catch (error) {
+    reportInstallFailure('onboard', error);
     console.error(error.message);
     process.exitCode = 4;
     return;
@@ -1856,6 +1861,7 @@ async function main() {
 }
 
 main().catch((e) => {
+  reportInstallFailure('command', e);
   console.error('rsc error:', e.message);
   process.exit(1);
 });

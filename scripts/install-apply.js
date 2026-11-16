@@ -31,6 +31,7 @@ import { wireGitPermissions, unwireGitPermissions, gitPermissionsPath } from '..
 import { wireDeepseekBridge } from '../targets/deepseek-bridge.js';
 import { materializeSkillToDir, catalogSkillKnown } from './lib/catalog-registry.js';
 import { localSkillSourceDir } from './lib/local-skills.js';
+import { installProgress, installProgressDetail, reportInstallFailure } from './lib/install-log.js';
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
 const CLI_VERSION = JSON.parse(readFileSync(join(ROOT, 'package.json'), 'utf8')).version;
@@ -293,6 +294,7 @@ export async function applyInstall({ skillIds = [], agentIds = [], target, home,
     ...prunedBases.map((id) => baseDir(id, cwd)),
   ])];
   if (dryRun) return { dryRun: true, skills: skillIds, agents: agentIds, paths: managedPaths };
+  installProgress(`${operation} → ${target} (${skillIds.length} skill(s), ${agentIds.length} agent override(s))`);
   // Rebuild the declared decisions first, so everything below (the agent tier especially) reads
   // the state the team declared rather than the default it would otherwise assume.
   if (fromScratch) hydrateLocalDecisions(cwd, readManifest(cwd));
@@ -317,9 +319,23 @@ export async function applyInstall({ skillIds = [], agentIds = [], target, home,
   }
   for (const step of plan) {
     if (step.kind === 'skill') {
-      const base = await ensureBase(step.id, cwd, baseVersions);
-      const files = await writeSkill(target, step.id, base, step.to);
-      state.skills[step.id] = { files, base };
+      installProgressDetail(`skill "${step.id}": materialize base`);
+      let base;
+      try {
+        base = await ensureBase(step.id, cwd, baseVersions);
+      } catch (error) {
+        reportInstallFailure(`materializing skill "${step.id}" for ${target}`, error);
+        throw error;
+      }
+      installProgressDetail(`skill "${step.id}": wire into ${target}`);
+      try {
+        const files = await writeSkill(target, step.id, base, step.to);
+        state.skills[step.id] = { files, base };
+        installProgress(`skill "${step.id}" → ${target}`);
+      } catch (error) {
+        reportInstallFailure(`wiring skill "${step.id}" for ${target}`, error);
+        throw error;
+      }
     } else if (step.kind === 'hook') {
       if (!skillIds.includes('suggest')) continue;
       try {
@@ -429,6 +445,7 @@ export async function applyInstall({ skillIds = [], agentIds = [], target, home,
     if (existsSync(join(cwd, '.git'))) mergeHook = installMergeHook(cwd);
   } catch (err) { mergeHook = { installed: false, state: 'skipped', reason: err.message }; }
   ignoreLocalState(cwd, target);
+  installProgress(`finished ${operation} for ${target}`);
   return { ...state, backup, mergeHook, keptAgents };
 }
 
