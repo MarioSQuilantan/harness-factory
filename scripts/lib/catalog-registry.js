@@ -125,7 +125,8 @@ export async function materializeSkillToDir(id, destDir, { cwd = process.cwd() }
     return { id, bundleHash: entry.bundleHash, source: 'bundled-registry' };
   }
 
-  const result = await installSkill(id, [], { projectDir: cwd });
+  const skillPath = entry.skillPath || id;
+  const result = await installSkill(skillPath, [], { projectDir: cwd });
   if (!result.success) {
     throw new Error(result.stderr || result.output || `failed to download ${id}`);
   }

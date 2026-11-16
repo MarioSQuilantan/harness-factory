@@ -337,12 +337,16 @@ export async function applyInstall({ skillIds = [], agentIds = [], target, home,
         throw error;
       }
     } else if (step.kind === 'hook') {
-      if (!skillIds.includes('suggest')) continue;
+      if (policy?.alwaysOn === false) continue;
       try {
-        const suggestMd = join(await ensureBase('suggest', cwd, baseVersions), 'SKILL.md');
-        if (existsSync(suggestMd)) await wireHook(target, paths, suggestMd, policy);
-      } catch {
-        /* suggest not local and not accepted from catalog — skip always-on hook */
+        let sourceMd = join(ROOT, 'scripts', 'assets', 'always-on-hook.md');
+        if (skillIds.includes('suggest')) {
+          const suggestMd = join(await ensureBase('suggest', cwd, baseVersions), 'SKILL.md');
+          if (existsSync(suggestMd)) sourceMd = suggestMd;
+        }
+        if (existsSync(sourceMd)) await wireHook(target, paths, sourceMd, policy);
+      } catch (error) {
+        reportInstallFailure(`wiring always-on hook for ${target}`, error);
       }
     }
   }

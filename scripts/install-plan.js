@@ -6,7 +6,7 @@ export function planInstall({ skillIds, target, home, cwd, hooks = true }) {
   for (const id of skillIds) {
     plan.push({ kind: 'skill', id, from: `skills/${id}`, to: t.skillDir(id) });
   }
-  if (hooks && skillIds.includes('suggest')) {
+  if (hooks) {
     plan.push({ kind: 'hook', target, to: t.hookTarget });
   }
   return plan;

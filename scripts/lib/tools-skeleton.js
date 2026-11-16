@@ -9,7 +9,7 @@ import { fileURLToPath } from 'node:url';
 // differs from the template is theirs and stays.
 
 const LIB_DIR = dirname(fileURLToPath(import.meta.url));
-export const TEMPLATE_SOURCE = join(LIB_DIR, '..', '..', 'skills', 'harness', 'assets', '_TEMPLATE');
+export const TEMPLATE_SOURCE = join(LIB_DIR, '..', 'assets', '01-tools-template');
 
 // Los ficheros que la plantilla trae hoy. Se lee del asset en vez de codificar una lista, para que
 // añadir un fichero a la plantilla no deje el suelo comprobando de menos en silencio.
@@ -24,7 +24,7 @@ export function templateAssets() {
 // npm NUNCA empaqueta un fichero llamado `.gitignore`, así que el asset viaja sin punto y se copia
 // con él. Sin esto, desde el paquete publicado se copiaban 4 de 5 ficheros y el que faltaba era el
 // único que evita comitear el `.env` que el README —copiado por el propio instalador— manda crear.
-const DOTTED = { gitignore: '.gitignore' };
+const DOTTED = { gitignore: '.gitignore', 'env.example': '.env.example' };
 export const targetName = (asset) => DOTTED[asset] ?? asset;
 
 // La capa entera, no cada proveedor: el flujo documentado es copiar `_TEMPLATE/` a

@@ -180,7 +180,9 @@ function hasDeclaredHarness(manifest = readManifest()) {
         && verifyOnboarding(process.cwd(), receipt.plan, receipt.acceptedPlanId).length === 0;
       if (verified) return true;
       if (receipt.maintenanceDrift && installedTargets(process.cwd()).some((target) => manifest.targets.includes(target))) return true;
-    } catch { return false; }
+    } catch {
+      if (installedTargets(process.cwd()).some((target) => manifest.targets.includes(target))) return true;
+    }
   }
   if (!Array.isArray(manifest.skills) || !manifest.skills.length) return false;
   // Backward compatibility is evidence-based: an actually installed pre-onboarding

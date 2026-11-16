@@ -501,7 +501,7 @@ test('floor: the skeleton refuses to write through a symlink that leaves the roo
 // al usuario que cree. La suite era ciega por construcción: aseveraba `>= 5` sobre el repo, cierto
 // ahí y falso en el artefacto publicado. El asset se llama ahora `gitignore` y se copia con punto.
 test('floor: the template protection travels in the published package', () => {
-  const assets = readdirSync(new URL('../skills/harness/assets/_TEMPLATE', import.meta.url));
+  const assets = readdirSync(new URL('../scripts/assets/01-tools-template', import.meta.url));
   assert.ok(!assets.includes('.gitignore'), 'un `.gitignore` no llegaría al paquete de npm');
   assert.ok(assets.includes('gitignore'), 'tiene que viajar sin punto y copiarse con él');
   const cwd = freshWorkspace('protect');
