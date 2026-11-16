@@ -44,6 +44,7 @@ import {
 import { configureInstallLog, installProgress, reportInstallFailure } from './lib/install-log.js';
 import { offerCatalogSkillInstall } from './lib/catalog-install-prompt.js';
 import { runUninstallWizard } from './lib/uninstall-wizard.js';
+import { collectHarnessStatus, renderStatusHtml, writeStatusPage, openStatusPage, revealStatusOnce } from './lib/harness-status.js';
 
 const rawArgv = process.argv.slice(2);
 configureInstallLog({ verbose: rawArgv.includes('--verbose') });
@@ -95,7 +96,7 @@ const PURGE_HELP = [
 const GLOBAL_VALUE_FLAGS = new Set([
   '--topic', '--target', '--technical-level', '--accompaniment', '--project-kind', '--goal', '--goal-base64', '--software-scope', '--workflow', '--emoji', '--accept-plan',
 ]);
-const COMMANDS = new Set(['ingest', 'copy', 'onboard', 'reassess', 'add', 'install', 'consult', 'catalog', 'audit', 'list', 'doctor', 'memory', 'knowledge-sync', 'git-permissions', 'agent-model', 'agents', 'emoji', 'main', 'isolation', 'sync', 'backups', 'restore', 'upgrade', 'registry', 'worktrees', 'capabilities', 'review', 'risk', 'spec', 'sello', 'repair', 'uninstall', 'remove', 'desinstalar', 'purge', 'skills']);
+const COMMANDS = new Set(['ingest', 'copy', 'onboard', 'reassess', 'add', 'install', 'consult', 'catalog', 'audit', 'list', 'doctor', 'status', 'memory', 'knowledge-sync', 'git-permissions', 'agent-model', 'agents', 'emoji', 'main', 'isolation', 'sync', 'backups', 'restore', 'upgrade', 'registry', 'worktrees', 'capabilities', 'review', 'risk', 'spec', 'sello', 'repair', 'uninstall', 'remove', 'desinstalar', 'purge', 'skills']);
 // Sync preserves project decisions. Only these explicit transitions clear an opt-out;
 // a missing local marker alone does not revoke a teammate's declared decision.
 const EXPLICIT_REARMS = {
@@ -383,6 +384,10 @@ async function runOnboarding(targets) {
     });
   }
   emitHarnessReadiness(plan, planId);
+  if (isInteractive()) {
+    const shown = revealStatusOnce(process.cwd(), { targets: plan.policy.targets });
+    if (shown.opened) say(`Panel: ${shown.file}`);
+  }
 }
 
 // La única línea que afirmaba que el arnés estaba listo lo hacía sin mirar si existía: «completado»
@@ -943,6 +948,8 @@ async function main() {
       markMaintenanceDrift('install harness');
       say(`✅ Harness wired for ${targets.join(', ')} (${ids.length} skill(s))`);
       printAgentHandoff();
+      const shown = revealStatusOnce(process.cwd(), { targets });
+      if (shown.opened) say(`Panel: ${shown.file}`);
       return;
     }
     case 'consult': {
@@ -1048,6 +1055,20 @@ async function main() {
       printDoctorHeadline(report);
       printContextBudget(report.contextBudget);
       return void say(JSON.stringify({ ...report, contextBudget: undefined }, null, 2));
+    }
+    case 'status': {
+      const snap = collectHarnessStatus(process.cwd(), { targets });
+      const file = writeStatusPage(process.cwd(), renderStatusHtml(snap));
+      if (argv.includes('--json')) say(JSON.stringify({ ...snap, panel: file }, null, 2));
+      else {
+        say(`Harness status: ${snap.health}`);
+        say(`Skills: ${snap.skills.length} · flagged: ${snap.flagged.length} · tools: ${snap.targets.map((row) => row.id).join(', ') || 'none'}`);
+        say(`Memory sessions: ${snap.sessions} · known tool calls: ${snap.toolCalls}`);
+        say(`Next: ${snap.next}`);
+        say(`Panel: ${file}`);
+      }
+      if (argv.includes('--open')) openStatusPage(file);
+      return;
     }
     case 'emoji': {
       // «sin emoji» / «con emoji»: a PROJECT decision, like `main`. The marker is the decision; syncing

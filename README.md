@@ -46,6 +46,18 @@ Install a catalog skill only after the person accepts it. Do not install a flagg
 
 If a failure is unclear, rerun the command with `--verbose` (or `HF_VERBOSE=1`).
 
+## Status
+
+From the project root:
+
+```bash
+$HF status
+$HF status --open
+$HF status --json
+```
+
+Writes `.rsc/status.html`: health, skills, flagged catalog ids, context size, memory sessions, and the model shared by each tool's subagents. The page stays on this machine. The first finished install opens it once.
+
 ## Add another tool
 
 The harness does not notice that you switched apps. What is already installed stays. To add one:
