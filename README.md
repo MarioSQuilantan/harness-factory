@@ -194,6 +194,9 @@ Run `harness-factory` with no args (after onboard) for the menu, or `harness-fac
 | `catalog` | List registry skills |
 | `consult "<text>"` | Rank autoskills + stack suggestions (use `add` or `catalog add` to opt in) |
 | `add <id...>` | Opt-in registry skills when needed, then install and wire assistants |
+| `remove` / `desinstalar` | Desinstalador interactivo (skills, un asistente, catálogo, o purge completo) |
+| `uninstall <id…>` | Quita skills/agents concretos; sin ids + TTY abre el mismo menú |
+| `purge` / `uninstall --all` | Borra todo el harness (`--dry-run` vista previa; `--with-docs` incluye wiki) |
 
 ### Local skills
 

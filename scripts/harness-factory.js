@@ -2,7 +2,7 @@
 import { loadManifest } from './lib/manifest.js';
 import { detectTarget, installedTargets, resolveTargets, TARGETS } from '../targets/index.js';
 import { toOutcomes } from './lib/recommend.js';
-import { applyInstall, listInstalled, listInstalledAgents, listInstalledCommands, uninstall, syncInstalled, purgeReport, collisions, ownSkillPaths, resetAgents } from './install-apply.js';
+import { applyInstall, listInstalled, listInstalledAgents, listInstalledCommands, uninstall, syncInstalled, purgeReport, collisions, ownSkillPaths, resetAgents, removeTargetInstall } from './install-apply.js';
 import { isAbsolute, relative, sep } from 'node:path';
 import {
   stackAgentNames, targetHasAgents, isValidAgentModel, agentModelSetting, targetInheritsByDefault,
@@ -40,6 +40,7 @@ import { classifyRequestedSkillIds, catalogOptInRequired, suggestionCandidates }
 import { recommendForProject } from './lib/consult-recommend.js';
 import { configureInstallLog, installProgress, reportInstallFailure } from './lib/install-log.js';
 import { offerCatalogSkillInstall } from './lib/catalog-install-prompt.js';
+import { runUninstallWizard } from './lib/uninstall-wizard.js';
 
 const rawArgv = process.argv.slice(2);
 configureInstallLog({ verbose: rawArgv.includes('--verbose') });
@@ -91,7 +92,7 @@ const PURGE_HELP = [
 const GLOBAL_VALUE_FLAGS = new Set([
   '--topic', '--target', '--technical-level', '--accompaniment', '--project-kind', '--goal', '--goal-base64', '--software-scope', '--workflow', '--emoji', '--accept-plan',
 ]);
-const COMMANDS = new Set(['ingest', 'copy', 'onboard', 'reassess', 'add', 'install', 'consult', 'catalog', 'audit', 'list', 'doctor', 'memory', 'knowledge-sync', 'git-permissions', 'agent-model', 'agents', 'emoji', 'main', 'isolation', 'sync', 'backups', 'restore', 'upgrade', 'registry', 'worktrees', 'capabilities', 'review', 'risk', 'spec', 'sello', 'repair', 'uninstall', 'purge', 'skills']);
+const COMMANDS = new Set(['ingest', 'copy', 'onboard', 'reassess', 'add', 'install', 'consult', 'catalog', 'audit', 'list', 'doctor', 'memory', 'knowledge-sync', 'git-permissions', 'agent-model', 'agents', 'emoji', 'main', 'isolation', 'sync', 'backups', 'restore', 'upgrade', 'registry', 'worktrees', 'capabilities', 'review', 'risk', 'spec', 'sello', 'repair', 'uninstall', 'remove', 'desinstalar', 'purge', 'skills']);
 // Sync preserves project decisions. Only these explicit transitions clear an opt-out;
 // a missing local marker alone does not revoke a teammate's declared decision.
 const EXPLICIT_REARMS = {
@@ -469,6 +470,28 @@ function flag(name) {
 
 // Remove everything rsc installed in this project (skills, hooks, .rsc/), across
 // every assistant. Keeps 02-DOCS/ unless --with-docs. `purge` / `uninstall --all`.
+function listDeclaredSkillIds() {
+  const m = readManifest();
+  return [...new Set([...(m?.skills || []), ...(m?.catalog?.selected || [])])].sort();
+}
+
+async function invokeUninstallWizard(targets) {
+  return runUninstallWizard({
+    cwd: process.cwd(),
+    targets,
+    say,
+    select,
+    pickFrom,
+    confirm,
+    isInteractive,
+    listSkillIds: listDeclaredSkillIds,
+    uninstallSkill: ({ target: t, skillIds }) => uninstall({ skillIds, target: t }),
+    removeAssistant: ({ target: t }) => removeTargetInstall({ cwd: process.cwd(), target: t }),
+    previewPurge: (dry, docs) => runPurge(dry, docs),
+    runPurge,
+  });
+}
+
 async function runPurge(dryRun, withDocs) {
   const cwd = process.cwd();
   const report = await purgeReport({ cwd, withDocs, dryRun });
@@ -1830,11 +1853,15 @@ async function main() {
           return;
       }
     }
+    case 'remove':
+    case 'desinstalar':
+      return invokeUninstallWizard(targets);
     case 'uninstall': {
       const dry = argv.includes('--dry-run');
       // `uninstall --all` is an alias for a full purge.
       if (argv.includes('--all')) return void (await runPurge(dry, argv.includes('--with-docs')));
       const ids = requestedIds();
+      if (!ids.length && isInteractive()) return invokeUninstallWizard(targets);
       // No id is not "nothing to remove": it is a command that was not given what it needs.
       if (!ids.length) {
         console.error(`rsc: uninstall needs at least one skill or agent id.\n${UNINSTALL_HELP}`);

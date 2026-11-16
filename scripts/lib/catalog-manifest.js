@@ -40,6 +40,18 @@ export function addCatalogSelection(cwd, ids) {
   return m;
 }
 
+export function removeCatalogSelection(cwd, ids) {
+  const m = readManifest(cwd);
+  if (!m) return null;
+  const drop = new Set(ids);
+  const catalog = { ...defaultCatalogBlock(), ...(m.catalog || {}) };
+  catalog.selected = (catalog.selected || []).filter((id) => !drop.has(id));
+  m.catalog = catalog;
+  m.skills = (m.skills || []).filter((id) => !drop.has(id));
+  writeManifest(cwd, m);
+  return m;
+}
+
 export function dismissCatalogSuggestions(cwd, ids) {
   const m = readManifest(cwd);
   if (!m) return null;
