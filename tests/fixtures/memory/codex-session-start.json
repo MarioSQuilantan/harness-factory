@@ -1,6 +1,0 @@
-{
-  "session_id": "codex-destination",
-  "cwd": "/fixture/project",
-  "hook_event_name": "SessionStart",
-  "source": "startup"
-}
