@@ -119,11 +119,15 @@ Requisitos técnicos (no los preguntes así al usuario):
 - CLI: HF="npx --yes git+https://github.com/MarioSQuilantan/harness-factory.git"
 - Todos los comandos desde la raíz de este proyecto.
 
-Entrevista breve ANTES de onboard:
-- Haz las preguntas de la tabla anterior en español claro, con opciones numeradas cuando ayude.
-- Si ya estás en Cursor, sugiere target cursor; si no estás seguro, pregunta.
-- Copia la frase del objetivo tal cual; la necesitarás dos veces (generar plan y aceptar plan).
-- Resume en 3 líneas lo que vas a configurar y pide un "sí, adelante" antes de ejecutar.
+Entrevista breve ANTES de onboard. Pregunta en español, con opciones numeradas. No muestres flags:
+1. ¿Con qué herramienta programas aquí? Cursor, Claude Code, Codex, Copilot, otra. → --target
+   Si ya estás en Cursor, sugiere cursor.
+2. ¿Qué estás construyendo? App o web, operaciones, investigación, contenido, mezcla. → --project-kind
+3. Si es software: ¿qué tan grande es ahora? Pequeño (MVP), creciendo, complejo. → --software-scope
+4. Si es software: ¿cambios directo en main, o ramas y PR? → --workflow
+5. ¿Cómo prefieres las instrucciones? Técnico, con analogías, mezcla. → --technical-level
+6. En una frase, ¿para qué es este proyecto? Cópiala tal cual; hace falta igual en el paso A y en el B. → --goal
+Resume en 3 líneas lo que vas a configurar y pide un "sí, adelante" antes de ejecutar.
 
 Flujo obligatorio (sin menús interactivos si no hay TTY):
 
@@ -146,7 +150,8 @@ Flujo obligatorio (sin menús interactivos si no hay TTY):
 4) Skills (BYO-first; el onboard puede dejar 0 skills de catálogo):
    - $HF catalog suggest
    - $HF consult "<lo que necesite el proyecto>" si hace falta
-   - $HF catalog add <id> --install  (autoskills CC-BY-NC; avísame si hay flagged)
+   - Enséñame la lista. Instala solo las que yo acepte, y ninguna marcada flagged.
+   - $HF catalog add <id> --install   (autoskills es CC-BY-NC; dímelo antes)
    - o skills/<id>/SKILL.md locales y $HF add <id>
 
 5) $HF install && $HF sync && $HF doctor
@@ -159,8 +164,8 @@ Desinstalar solo si el usuario lo pide:
 Al terminar (en lenguaje claro, no en jerga):
 - Qué se guardó en el proyecto y qué carpeta usa mi herramienta (sin listar solo rutas crípticas).
 - Pídeme recargar Cursor / Claude / la herramienta que elegí.
-- Si algo quedó pendiente, explícalo en una frase y el siguiente comando.
-- No digas "listo" si doctor no está healthy/ready.
+- doctor puede salir con código 0, "Harness health: healthy" y "Onboarding readiness: pending" si constitution.md sigue en draft. Eso es una instalación terminada: dilo, y que la constitución se completa antes del primer trabajo SDD.
+- No digas "listo" si health es unhealthy o readiness es incomplete. Explica el fallo en una frase y el siguiente comando.
 ```
 
 ### Prompt corto solo para ti (si prefieres responder tú)
