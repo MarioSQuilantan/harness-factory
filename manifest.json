@@ -1,0 +1,10 @@
+{
+  "version": "1.0.0",
+  "catalogSource": "autoskills",
+  "counts": {
+    "skills": 0,
+    "agents": 0,
+    "commands": 0
+  },
+  "skills": []
+}

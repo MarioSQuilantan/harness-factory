@@ -1,0 +1,49 @@
+{
+  "name": "harness-factory",
+  "version": "0.1.0",
+  "description": "Harness Factory — rsc-style onboarding and wiring without an embedded skill catalog; BYO-first with optional autoskills registry.",
+  "type": "module",
+  "bin": {
+    "harness-factory": "scripts/harness-factory.js",
+    "rsc": "scripts/harness-factory.js"
+  },
+  "engines": {
+    "node": ">=22.6.0"
+  },
+  "scripts": {
+    "test": "node --test",
+    "coverage": "c8 --reporter=text node --test"
+  },
+  "dependencies": {
+    "@iarna/toml": "^2.2.5",
+    "ajv": "^8.18.0",
+    "autoskills": "^0.4.1"
+  },
+  "devDependencies": {
+    "c8": "^10.1.3"
+  },
+  "files": [
+    "scripts",
+    "targets",
+    "schema",
+    "manifest.json",
+    "!**/__pycache__/**",
+    "!**/*.pyc"
+  ],
+  "keywords": [
+    "agent-skills",
+    "cursor",
+    "claude-code",
+    "harness",
+    "autoskills",
+    "factory"
+  ],
+  "license": "MIT",
+  "author": "Mario S. Quilantan",
+  "homepage": "https://github.com/MarioSQuilantan/harness-factory",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/MarioSQuilantan/harness-factory.git"
+  },
+  "private": true
+}
