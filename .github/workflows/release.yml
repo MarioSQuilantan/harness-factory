@@ -1,195 +1,66 @@
 name: release
 
-# Publishes rsc-universal to npm and forces a new version on every push to main.
-# Manual runs (workflow_dispatch) let you pick patch / minor / major. A PR that sets package.json
-# above the published version has chosen the number itself: that version is published as is.
-#
-# The version-bump commit carries "[skip ci]" so it does NOT re-trigger this
-# workflow (no publish loop).
-#
-# Requires repo secret NPM_TOKEN (npm automation token). Needs main to allow
-# the GITHUB_TOKEN to push (no protection rule blocking Actions, or use a PAT).
-#
-# After publishing to npm it also cuts a GitHub Release for the new tag, with
-# notes auto-generated from the commits/PRs since the previous tag.
+# Manual only — Harness Factory is private and does not auto-publish to npm.
+# Run from Actions when you are ready to cut a version and publish (requires NPM_TOKEN).
 
 on:
-  push:
-    branches: [main]
   workflow_dispatch:
     inputs:
       bump:
-        description: 'Version bump'
+        description: Version bump (before publish)
         type: choice
         options: [patch, minor, major]
         default: patch
+      publish:
+        description: Publish to npm after tests
+        type: boolean
+        default: false
+
+permissions:
+  contents: write
+  id-token: write
 
 concurrency:
   group: release
   cancel-in-progress: false
 
-permissions:
-  contents: write      # push the version-bump commit + tag
-  id-token: write      # npm provenance via OIDC
-
 jobs:
-  # A run queued behind another can find the tip already released: two merges seconds apart, and
-  # the first run (which releases the tip) took both. Its tip is then that release's own tagged
-  # version commit, and releasing it again would publish an empty patch. A manual run always goes.
-  news:
-    runs-on: ubuntu-latest
-    outputs:
-      released: ${{ steps.tip.outputs.released }}
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          ref: main
-          fetch-depth: 0
-      - id: tip
-        run: |
-          if [ "${{ github.event_name }}" = push ] && git tag --points-at HEAD | grep -q '^v[0-9]'; then
-            echo "main is already released as $(git tag --points-at HEAD | grep '^v[0-9]' | head -1); nothing to publish"
-            echo "released=true" >> "$GITHUB_OUTPUT"
-          else
-            echo "released=false" >> "$GITHUB_OUTPUT"
-          fi
-
-  release:
-    needs: news
-    if: needs.news.outputs.released != 'true'
+  verify:
     runs-on: ubuntu-latest
     steps:
-      # The tip of main, not the commit that triggered the run. Runs queue one behind the other
-      # (concurrency above), and the one queued behind a release must start from that release's
-      # version commit. Checked out at its own trigger commit it still read the old version, bumped
-      # to the number just released, and npm refused it with a 409 (#326 and #336 merged a few
-      # seconds apart, 2026-11-01). Releasing the tip also covers everything merged so far.
       - uses: actions/checkout@v4
-        with:
-          ref: main
-          fetch-depth: 0
-
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
           registry-url: 'https://registry.npmjs.org'
-
       - run: npm ci
+      - run: npm run test:ci
+      - run: node scripts/harness-factory.js catalog refresh
 
-      # --- gates: never publish a broken catalog -------------------------------
-      - name: validate frontmatter + recommends
-        run: npm run validate
-      - name: manifest is current
-        run: npm run manifest:check
-      - name: tests
-        run: npm test
-      - name: eval-lint
-        run: bash scripts/eval-lint.sh
-      - name: originality
-        run: npm run originality:check
-
-      # --- bump version (auto-patch on push; chosen bump on manual run) ---------
-      - name: Configure git identity
-        run: |
-          git config user.name "Eric Risco"
-          git config user.email "erisco@icloud.com"
-      # The registry is the source of truth for "what is already released". If a previous run
-      # published and tagged but failed to push the bump commit back (main advanced under it),
-      # package.json is left behind and every later run recomputes the SAME version, hits
-      # "tag already exists" and dies — wedging releases permanently. Reconciling first makes
-      # the pipeline self-healing instead.
-      #
-      # "Released" is the higher of the registry and the newest `v*` tag. The registry can lag: a
-      # version npm has accepted may take minutes to show in `npm view`, and that delay alone made a
-      # run compute a version already taken. A tag is only cut after a successful publish (below).
-      - name: Reconcile version with the registry
-        id: released
-        run: |
-          REGISTRY="$(npm view @ericrisco/rsc version 2>/dev/null || echo 0.0.0)"
-          TAGGED="$(git tag -l 'v[0-9]*' | sed 's/^v//' | grep -E '^[0-9]+\.[0-9]+\.[0-9]+$' | sort -V | tail -1)"
-          PUBLISHED="$(printf '%s\n%s\n' "$REGISTRY" "${TAGGED:-0.0.0}" | sort -V | tail -1)"
-          echo "registry=$REGISTRY tagged=${TAGGED:-none} released=$PUBLISHED"
-          echo "version=$PUBLISHED" >> "$GITHUB_OUTPUT"
-          LOCAL="$(node -p "require('./package.json').version")"
-          HIGHEST="$(printf '%s\n%s\n' "$PUBLISHED" "$LOCAL" | sort -V | tail -1)"
-          echo "published=$PUBLISHED local=$LOCAL highest=$HIGHEST"
-          if [ "$HIGHEST" != "$LOCAL" ]; then
-            npm version "$HIGHEST" --no-git-tag-version --allow-same-version
-            git add package.json package-lock.json manifest.json
-            git commit -m "🔧 chore: realign version with the registry ($LOCAL -> $HIGHEST) [skip ci]"
-          fi
-
-      # No tag here on purpose. The tag is created after the commit is pushed (see below), so
-      # it can only ever point at something that actually landed on main.
+  release:
+    needs: verify
+    if: github.event.inputs.publish == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          registry-url: 'https://registry.npmjs.org'
+      - run: npm ci
       - name: Bump version
-        id: bump
-        run: |
-          BUMP="${{ github.event.inputs.bump || 'patch' }}"
-          PUBLISHED="${{ steps.released.outputs.version }}"
-          LOCAL="$(node -p "require('./package.json').version")"
-          # A PR that set a version above the registry chose the number (a minor or major release
-          # decided in review); publish it as is. Otherwise bump as always. Every gate above still
-          # ran. The release commit may then be empty, which keeps the invariant below (the tag
-          # points at a commit that landed on main) without a second path.
-          if [ "$LOCAL" != "$PUBLISHED" ] && [ "$(printf '%s\n%s\n' "$PUBLISHED" "$LOCAL" | sort -V | tail -1)" = "$LOCAL" ]; then
-            echo "version $LOCAL was set in the PR (registry has $PUBLISHED); publishing it as is"
-          else
-            npm version "$BUMP" --no-git-tag-version
-          fi
-          VERSION="$(node -p "require('./package.json').version")"
-          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
-          git add package.json package-lock.json manifest.json
-          git commit --allow-empty -m "🔖 chore(release): $VERSION [skip ci]"
-
-      # --- publish + push the bump back ----------------------------------------
+        run: npm version "${{ inputs.bump }}" --no-git-tag-version
       - name: Publish to npm
-        id: publish
-        run: |
-          echo "sha=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
-          npm publish --provenance --access public
+        run: npm publish --access public --provenance
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
-      # main can advance while this job runs (a PR merging behind it), which rejects the push as
-      # non-fast-forward — so rebase and retry. Tagging is deliberately NOT part of this step:
-      # a rebase rewrites the commit's sha, and a tag made beforehand would be left pointing at
-      # an orphan. Push the commit, then tag whatever landed.
-      - name: Push version commit
-        run: |
-          for attempt in 1 2 3; do
-            git fetch origin main
-            git rebase origin/main || { git rebase --abort; exit 1; }
-            if git push origin HEAD:main; then
-              echo "pushed on attempt $attempt"
-              exit 0
-            fi
-            echo "push rejected, retrying ($attempt/3)"
-            sleep 5
-          done
-          echo "::error::could not push the version commit after 3 attempts"
-          exit 1
-
-      # The invariant this pipeline lost for four days: a tag never exists without its commit.
-      # Tagging only after a successful push is what guarantees it, in both directions.
-      #
-      # The tag also names exactly what was published. When main moved during the run, the rebase
-      # put the version commit on top of code the tarball does not have: v3.7.2 was tagged on the
-      # #332 fix that only 3.7.3 shipped. If the rebased tree differs from the published one, the
-      # tag goes on the published commit (the tag push keeps it), and the next run releases the rest.
-      - name: Tag the released commit
-        run: |
-          V="v${{ steps.bump.outputs.version }}"
-          TARGET=HEAD
-          if ! git diff --quiet "${{ steps.publish.outputs.sha }}" HEAD; then
-            TARGET="${{ steps.publish.outputs.sha }}"
-            echo "::warning::main moved during the release; $V is tagged on the published commit $TARGET"
-          fi
-          git tag -a "$V" -m "🔖 chore(release): ${{ steps.bump.outputs.version }}" "$TARGET"
-          git push origin "$V"
-
-      # --- cut a GitHub Release for the new tag --------------------------------
-      - name: Create GitHub Release
+      - name: Tag release
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          VERSION="$(node -p "require('./package.json').version")"
-          gh release create "v$VERSION" --title "v$VERSION" --generate-notes
+          V="v$(node -p "require('./package.json').version")"
+          git tag -a "$V" -m "Release $V"
+          git push origin "$V"
+          gh release create "$V" --title "$V" --generate-notes

@@ -12,7 +12,8 @@
   },
   "scripts": {
     "test": "node --test",
-    "coverage": "c8 --reporter=text node --test"
+    "test:ci": "node --test tests/harness-factory-catalog.test.js",
+    "coverage": "c8 --reporter=text node --test tests/harness-factory-catalog.test.js"
   },
   "dependencies": {
     "@iarna/toml": "^2.2.5",
