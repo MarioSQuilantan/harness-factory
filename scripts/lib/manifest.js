@@ -19,10 +19,12 @@ export function loadManifest() {
     },
     skills: listCatalogSkillIds().map((id) => {
       const meta = getCatalogSkillMeta(id);
+      const description = meta?.source ? `${id} — ${meta.source}` : id;
+      const tags = id.split(/[-_]/).filter((part) => part.length > 1);
       return {
         id,
-        description: meta?.source || `autoskills registry skill ${id}`,
-        tags: [],
+        description,
+        tags,
         profiles: [],
       };
     }),

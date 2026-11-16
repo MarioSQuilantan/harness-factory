@@ -43,8 +43,11 @@ Run `harness-factory` with no args (after onboard) for the menu, or `harness-fac
 |---------|---------|
 | `catalog refresh` | Reload autoskills registry cache |
 | `catalog suggest` | Stack-based suggestions (deferred until you add them) |
-| `catalog add <id...>` | Record opt-in in `.rsc.json` and install on next sync/onboard |
+| `catalog add <id...>` | Record opt-in in `.rsc.json` (`catalog.selected`) |
+| `catalog add <id...> --install` | Opt in and materialize into `.rsc/skills/` for declared targets |
 | `catalog` | List registry skills |
+| `consult "<text>"` | Rank autoskills + stack suggestions (use `add` or `catalog add` to opt in) |
+| `add <id...>` | Opt-in registry skills when needed, then install and wire assistants |
 
 ### Local skills
 

@@ -1,9 +1,7 @@
 #!/usr/bin/env node
 import { loadManifest } from './lib/manifest.js';
 import { detectTarget, installedTargets, resolveTargets, TARGETS } from '../targets/index.js';
-import { detectRepo } from './detect-repo.js';
-import { rank } from './consult.js';
-import { expandRecommends, toOutcomes, hasOutcome } from './lib/recommend.js';
+import { toOutcomes } from './lib/recommend.js';
 import { applyInstall, listInstalled, listInstalledAgents, listInstalledCommands, uninstall, syncInstalled, purgeReport, collisions, ownSkillPaths, resetAgents } from './install-apply.js';
 import { isAbsolute, relative, sep } from 'node:path';
 import {
@@ -38,6 +36,8 @@ import { detectLocalSkills } from './lib/local-skills.js';
 import {
   declaredInstallSkillIds, localOnlyInstallSkillIds, policyForProjectInstall, catalogPickerDomains,
 } from './lib/install-profiles.js';
+import { classifyRequestedSkillIds, catalogOptInRequired, suggestionCandidates } from './lib/skill-resolution.js';
+import { recommendForProject } from './lib/consult-recommend.js';
 
 const rawArgv = process.argv.slice(2);
 // With `.rsc/.no-emoji` in the project, everything `say` prints is in words (targets/emoji-policy.mjs).
@@ -425,20 +425,12 @@ function editDistance(a, b) {
 }
 
 function classifyRequested(ids) {
-  const skills = new Set(loadManifest().skills.map((skill) => skill.id));
-  const agents = new Set(stackAgentNames());
-  const out = { skills: [], agents: [], unknown: [] };
-  for (const id of ids) {
-    if (skills.has(id)) out.skills.push(id);
-    else if (agents.has(id)) out.agents.push(id);
-    else out.unknown.push(id);
-  }
-  return out;
+  return classifyRequestedSkillIds(ids, process.cwd());
 }
 
 function reportUnknown(ids) {
   if (!ids.length) return false;
-  const candidates = [...loadManifest().skills.map((skill) => skill.id), ...stackAgentNames()];
+  const candidates = suggestionCandidates(process.cwd());
   for (const id of ids) {
     const close = [...candidates].sort((a, b) => editDistance(id, a) - editDistance(id, b) || a.localeCompare(b)).slice(0, 3);
     console.error(`rsc: unknown skill or agent '${id}'. Closest: ${close.join(', ')}`);
@@ -492,16 +484,19 @@ async function runPurge(dryRun, withDocs) {
   }
 }
 
-async function recommendIds(query, { labeledOnly = false } = {}) {
-  const m = loadManifest();
-  const repo = detectRepo();
-  const ranked = query ? (await rank(m, query)).map((r) => r.id) : [];
-  let base = [...new Set(query ? [...ranked, ...repo] : repo)].filter((id) => id !== 'suggest');
-  if (labeledOnly) base = base.filter(hasOutcome);
-  base = base.slice(0, 4);
-  let out = expandRecommends(m, base).filter((id) => id !== 'suggest');
-  if (labeledOnly) out = out.filter(hasOutcome);
-  return out.slice(0, 6);
+async function recommendIds(query, options = {}) {
+  return recommendForProject(query, process.cwd(), options);
+}
+
+async function installDeclaredSkills(targetList) {
+  const ids = declaredInstallSkillIds();
+  const receipt = readManifest()?.onboarding;
+  const policy = policyForProjectInstall();
+  const { policy: governedPolicy, onboarding } = governedBy(receipt, ids);
+  const installPolicy = governedPolicy ? { ...governedPolicy, skills: ids } : policy;
+  for (const t of targetList) {
+    await applyInstall({ skillIds: ids, target: t, policy: installPolicy, onboarding });
+  }
 }
 
 // Pick skills by browsing the domains, accumulating across rounds.
@@ -844,6 +839,8 @@ async function main() {
       const requested = replaceRetired(asked);
       const selected = classifyRequested(requested);
       if (reportUnknown(selected.unknown)) return;
+      const optIn = catalogOptInRequired(selected.skills);
+      if (optIn.length) addCatalogSelection(process.cwd(), optIn);
       const ids = withDefaultSkillFloor(selected.skills);
       if (!argv.includes('--force') && !(await guardCollisions(targets, ids))) return;
       const currentManifest = readManifest();
@@ -882,9 +879,14 @@ async function main() {
       return;
     }
     case 'consult': {
-      const ids = await recommendIds(argv.slice(1).join(' '));
+      const ids = await recommendForProject(argv.slice(1).join(' '), process.cwd());
       if (!ids.length) return void say('(no recommendations)');
-      for (const o of toOutcomes(ids)) say(`${o.id}\t${o.label}`);
+      for (const o of toOutcomes(ids)) {
+        const flagged = getCatalogSkillMeta(o.id)?.review?.status === 'flagged' ? '\t[registry: flagged]' : '';
+        say(`${o.id}\t${o.label}${flagged}`);
+      }
+      say('\nOpt in:  harness-factory catalog add <id>');
+      say('Install: harness-factory add <id>');
       return;
     }
     case 'catalog': {
@@ -913,7 +915,19 @@ async function main() {
           }
         }
         addCatalogSelection(process.cwd(), ids);
-        say(`catalog.selected: ${ids.join(', ')} (run sync or onboard --accept-plan to materialize)`);
+        say(`catalog.selected: ${ids.join(', ')}`);
+        if (argv.includes('--install')) {
+          if (!hasDeclaredHarness()) return onboardingRequired(onboardingInput(targets));
+          const wireTargets = targets.length ? targets : (readManifest()?.targets || []);
+          if (!wireTargets.length) {
+            say('No targets in .rsc.json — run onboard first.');
+            return;
+          }
+          await installDeclaredSkills(wireTargets);
+          say(`✅ Materialized for ${wireTargets.join(', ')}: ${ids.join(', ')}`);
+          return void say('   ↻ Reload/restart your assistant.');
+        }
+        say('Materialize: harness-factory catalog add <id> --install  ·  or  harness-factory add <id>');
         return;
       }
       const m = loadManifest();

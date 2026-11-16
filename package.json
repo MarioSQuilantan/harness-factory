@@ -12,7 +12,7 @@
   },
   "scripts": {
     "test": "node --test",
-    "test:ci": "node --test tests/harness-factory-catalog.test.js tests/detect-repo.test.js tests/default-skill-floor.test.js tests/harness-factory-manifest.test.js tests/harness-factory-wizard.test.js tests/manifest-file.test.js tests/onboarding.test.js tests/local-cli-instructions.test.js",
+    "test:ci": "node --test tests/harness-factory-catalog.test.js tests/detect-repo.test.js tests/default-skill-floor.test.js tests/harness-factory-manifest.test.js tests/harness-factory-wizard.test.js tests/harness-factory-add-consult.test.js tests/manifest-file.test.js tests/onboarding.test.js tests/local-cli-instructions.test.js",
     "coverage": "c8 --reporter=text npm run test:ci"
   },
   "dependencies": {
