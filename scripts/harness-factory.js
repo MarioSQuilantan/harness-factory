@@ -38,6 +38,9 @@ import {
 } from './lib/install-profiles.js';
 import { classifyRequestedSkillIds, catalogOptInRequired, suggestionCandidates } from './lib/skill-resolution.js';
 import { recommendForProject } from './lib/consult-recommend.js';
+import {
+  draftGoal, interviewCopy, markRecommended, recommendedLanguage, recommendedProjectKind,
+} from './lib/interview-copy.js';
 import { configureInstallLog, installProgress, reportInstallFailure } from './lib/install-log.js';
 import { offerCatalogSkillInstall } from './lib/catalog-install-prompt.js';
 import { runUninstallWizard } from './lib/uninstall-wizard.js';
@@ -257,43 +260,56 @@ async function runOnboarding(targets) {
   const raw = onboardingInput(targets);
   if (isInteractive() && missingOnboardingFields(raw).length) {
     await banner(loadManifest().counts.skills);
-    say('Before rsc writes anything, it will learn how to help and show the exact harness plan.');
-    // One question about the person, not two: the register. `--technical-level mixed` is still
-    // accepted from the command line and reads like non-technical — with analogies.
-    raw.technicalLevel ||= await select('How should I talk to you?', [
-      { key: 'technical', label: 'Technical — assume I am comfortable with code and tooling' },
-      { key: 'non-technical', label: 'With analogies and plain words — explain terms, no jargon' },
-    ]);
-    raw.projectKind ||= await select('What are you building or running?', [
-      { key: 'software', label: 'Software or a website' },
-      { key: 'operations', label: 'Operations, a company or a process' },
-      { key: 'research', label: 'Research or a knowledge base' },
-      { key: 'content', label: 'Content or publishing' },
-      { key: 'mixed', label: 'A combination of these' },
-    ]);
-    raw.goal ||= await ask('What do you want this project to achieve? > ');
+    const suggestedLang = recommendedLanguage();
+    const langPick = await select(interviewCopy('en').language, ['en', 'es', 'pt', 'fr', 'other'].map((key) => ({
+      key,
+      label: key === suggestedLang ? markRecommended(interviewCopy('en').langs[key], suggestedLang) : interviewCopy('en').langs[key],
+    })), { recommended: suggestedLang });
+    let lang = langPick;
+    if (lang === 'other') {
+      await ask(interviewCopy('en').otherAsk);
+      say(interviewCopy('en').otherFallback);
+      lang = 'en';
+    }
+    if (!lang) {
+      say(interviewCopy('en').cancelled);
+      return;
+    }
+    const copy = interviewCopy(lang);
+    say(copy.intro);
+    raw.technicalLevel ||= await select(copy.tone, ['technical', 'non-technical', 'mixed'].map((key) => ({
+      key,
+      label: key === 'mixed' ? markRecommended(copy.tones[key], lang) : copy.tones[key],
+    })), { recommended: 'mixed' });
+    const kindGuess = recommendedProjectKind(process.cwd());
+    raw.projectKind ||= await select(copy.kind, ['software', 'operations', 'research', 'content', 'mixed'].map((key) => ({
+      key,
+      label: key === kindGuess ? markRecommended(copy.kinds[key], lang) : copy.kinds[key],
+    })), { recommended: kindGuess });
     if ((raw.projectKind === 'software' || raw.projectKind === 'mixed') && !raw.softwareScope) {
-      raw.softwareScope = await select('How much software work is expected now?', [
-        { key: 'small', label: 'Small — one focused tool or a few simple changes' },
-        { key: 'growing', label: 'Growing — several related features or integrations' },
-        { key: 'complex', label: 'Complex — multiple systems, teams or critical behavior' },
-      ]);
+      raw.softwareScope = await select(copy.scope, ['small', 'growing', 'complex'].map((key) => ({
+        key,
+        label: key === 'small' ? markRecommended(copy.scopes[key], lang) : copy.scopes[key],
+      })), { recommended: 'small' });
     }
     if ((raw.projectKind === 'software' || raw.projectKind === 'mixed') && !raw.workflow) {
-      const branchesFirst = raw.softwareScope === 'complex';
-      const options = [
-        { key: 'main', label: 'Straight on main — research, content, scripts, simple projects' },
-        { key: 'branches', label: 'Branches + pull request — long-lived, complex code' },
-      ];
-      raw.workflow = await select('How should code changes land?', branchesFirst ? options.reverse() : options);
+      raw.workflow = await select(copy.workflow, ['main', 'branches'].map((key) => ({
+        key,
+        label: key === 'main' ? markRecommended(copy.flows[key], lang) : copy.flows[key],
+      })), { recommended: 'main' });
     }
-    raw.emoji ||= await select('Emoji in replies, commits and rsc messages?', [
-      { key: 'on', label: 'Yes — as rsc does by default' },
-      { key: 'off', label: 'No — words instead, in replies, commits and rsc messages' },
-    ]);
-    if (!raw.targets?.length) raw.targets = await selectAgents();
+    if (!raw.goal) {
+      const suggestion = draftGoal(process.cwd());
+      const typed = await ask(suggestion ? `${copy.goal}\n${copy.goalHint}: ${suggestion}\n> ` : `${copy.goal}\n> `);
+      raw.goal = typed || suggestion;
+    }
+    raw.emoji ||= await select(copy.emoji, [
+      { key: 'on', label: emojiOff(process.cwd()) ? copy.emojiOn : markRecommended(copy.emojiOn, lang) },
+      { key: 'off', label: emojiOff(process.cwd()) ? markRecommended(copy.emojiOff, lang) : copy.emojiOff },
+    ], { recommended: emojiOff(process.cwd()) ? 'off' : 'on' });
+    if (!raw.targets?.length) raw.targets = await selectAgents(copy, lang);
     if (!raw.technicalLevel || !raw.projectKind || !raw.goal || !raw.targets?.length) {
-      say('Cancelled — nothing was touched.');
+      say(copy.cancelled);
       return;
     }
   }
@@ -561,15 +577,16 @@ async function manualSelect(domains = DOMAINS) {
 
 // Ask which assistants to install into. The detected one is pre-labelled but
 // nothing is auto-applied — the user always confirms the set (one or many).
-async function selectAgents() {
+async function selectAgents(copy = interviewCopy('en'), lang = 'en') {
   const detected = detectTarget();
   const items = TARGETS.map((t) => ({
     id: t.id,
-    label: `${t.label}  (${t.hint})${t.id === detected ? '   ⟵ detected here' : ''}`,
+    recommended: t.id === detected,
+    label: t.id === detected ? `${markRecommended(t.label, lang)}  (${t.hint})` : `${t.label}  (${t.hint})`,
   }));
-  const chosen = await pickFrom('Which assistants do you want to install for? (space to toggle, a = all)', items);
-  if (chosen === null) return null;          // esc → back to the main menu
-  return chosen.length ? chosen : [detected];
+  const chosen = await pickFrom(copy.tools, items);
+  if (!chosen?.length) return null;
+  return chosen;
 }
 
 // After installing, remind the user how to actually start — per IDE — and that

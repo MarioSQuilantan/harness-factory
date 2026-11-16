@@ -181,9 +181,9 @@ function captureKeys(onKey) {
 }
 
 // Single choice: ↑↓ to move, Enter to pick. options: [{ key, label }].
-function tuiSelect(question, options) {
+function tuiSelect(question, options, start = 0) {
   return new Promise((resolve) => {
-    let i = 0;
+    let i = Math.min(Math.max(start, 0), Math.max(options.length - 1, 0));
     const paint = makePainter();
     const render = () => paint([
       C.bold(question),
@@ -207,6 +207,7 @@ function tuiChecklist(title, items) {
   return new Promise((resolve) => {
     const VISIBLE = Math.min(items.length, 12);
     const sel = new Set();
+    items.forEach((it, idx) => { if (it.recommended) sel.add(idx); });
     let cur = 0; let top = 0;
     const paint = makePainter();
     const render = () => {
@@ -240,8 +241,9 @@ function tuiChecklist(title, items) {
 }
 
 // Public: single-choice menu. options: [{ key, label }]. Returns the chosen key.
-export async function select(question, options) {
-  if (interactive()) return tuiSelect(question, options);
+export async function select(question, options, { recommended } = {}) {
+  const start = recommended ? Math.max(0, options.findIndex((o) => o.key === recommended)) : 0;
+  if (interactive()) return tuiSelect(question, options, start);
   // Fallback: typed number.
   say(question);
   options.forEach((o, i) => say(`  ${i + 1}) ${o.label}`));
