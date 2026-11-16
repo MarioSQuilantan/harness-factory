@@ -20,15 +20,15 @@ Install this repository https://github.com/MarioSQuilantan/harness-factory in th
 
 ## Install interview
 
-When that prompt is used, read this section and show the questions before any install command. Wait for the person's answers. Never fill an answer from the repo, the IDE, a README, or silence. Do not run onboard until they have answered.
+When that prompt is used, read this section before any install command. Show **one question per screen**. Do not group questions in one form. After the person answers, wait until they press Next, then show the next question. Every question must include one option marked **Recommended**. A recommendation is not an answer: do not run onboard until they pick or confirm each one.
 
-1. First question, single choice: "Which language do you speak?" English, Spanish, Portuguese, French, or another they type. Ask every later question, and write every reply, in that language.
-2. Multi-select, not one letter: "Which tools do you use to code here? Select every one you use." Cursor, Claude Code, Codex, Copilot, Gemini, OpenCode, Junie, Kiro, Windsurf, Cline, Roo Code, Continue, Antigravity, Zed, Amp, DeepSeek, Pi, Jules, Aider. Check Cursor only if they are already in Cursor; they may add others. Map the chosen ones to `--target` separated by commas (`cursor,claude`).
-3. What are you building? App or web | operations | research | content | mixed. → `software` | `operations` | `research` | `content` | `mixed`
-4. If it is software: small, growing, or complex? → `small` | `growing` | `complex`
-5. If it is software: straight to main, or branches and PRs? → `main` | `branches`
-6. How should instructions be written: technical, with analogies, or a mix? → `technical` | `non-technical` | `mixed`
-7. In one sentence, what is this project for? Copy it exactly. Both onboard steps use that same sentence.
+1. First question, single choice: "Which language do you speak?" English, Spanish, Portuguese, French, or another they type. **Recommended:** the language of this chat. Ask every later question, and write every reply, in the language they choose.
+2. Multi-select, not one letter: "Which tools do you use to code here? Select every one you use." Cursor, Claude Code, Codex, Copilot, Gemini, OpenCode, Junie, Kiro, Windsurf, Cline, Roo Code, Continue, Antigravity, Zed, Amp, DeepSeek, Pi, Jules, Aider. **Recommended:** the app this chat is running in, pre-checked; they may add others. Map the chosen ones to `--target` separated by commas (`cursor,claude`).
+3. What are you building? App or web | operations | research | content | mixed. → `software` | `operations` | `research` | `content` | `mixed`. **Recommended:** `software` when the repo is an app; otherwise the closest match, still shown as a choice.
+4. If it is software: small, growing, or complex? → `small` | `growing` | `complex`. **Recommended:** `small` for a new or single-purpose app.
+5. If it is software: straight to main, or branches and PRs? → `main` | `branches`. **Recommended:** `main`.
+6. How should instructions be written: technical, with analogies, or a mix? → `technical` | `non-technical` | `mixed`. **Recommended:** `mixed`.
+7. In one sentence, what is this project for? **Recommended:** one sentence drafted from the project, shown for them to accept or replace. Copy the sentence they confirm exactly. Both onboard steps use that same sentence.
 
 Summarize the answers in 3 lines and wait for a yes. Then, from the project root, with Node >= 22.6:
 
