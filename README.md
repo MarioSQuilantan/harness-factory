@@ -16,26 +16,33 @@ Paste this into the chat of the agent that has a terminal:
 
 ```
 Install this repository https://github.com/MarioSQuilantan/harness-factory in this project.
+```
 
-Always ask the interview below before any install command. Wait for the person's answers. Never fill an answer from the repo, the IDE, a README, or silence. Do not run onboard until they have answered.
+## Install interview
+
+When that prompt is used, read this section and show the questions before any install command. Wait for the person's answers. Never fill an answer from the repo, the IDE, a README, or silence. Do not run onboard until they have answered.
 
 1. First question, single choice: "Which language do you speak?" English, Spanish, Portuguese, French, or another they type. Ask every later question, and write every reply, in that language.
-2. Multi-select, not one letter: "Which tools do you use to code here? Select every one you use." Cursor, Claude Code, Codex, Copilot, Gemini, OpenCode, Junie, Kiro, Windsurf, Cline, Roo Code, Continue, Antigravity, Zed, Amp, DeepSeek, Pi, Jules, Aider. Check Cursor only if they are already in Cursor; they may add others. Map the chosen ones to --target separated by commas (cursor,claude).
-3. What are you building? App or web | operations | research | content | mixed. → software | operations | research | content | mixed
-4. If it is software: small, growing, or complex? → small | growing | complex
-5. If it is software: straight to main, or branches and PRs? → main | branches
-6. How should instructions be written: technical, with analogies, or a mix? → technical | non-technical | mixed
+2. Multi-select, not one letter: "Which tools do you use to code here? Select every one you use." Cursor, Claude Code, Codex, Copilot, Gemini, OpenCode, Junie, Kiro, Windsurf, Cline, Roo Code, Continue, Antigravity, Zed, Amp, DeepSeek, Pi, Jules, Aider. Check Cursor only if they are already in Cursor; they may add others. Map the chosen ones to `--target` separated by commas (`cursor,claude`).
+3. What are you building? App or web | operations | research | content | mixed. → `software` | `operations` | `research` | `content` | `mixed`
+4. If it is software: small, growing, or complex? → `small` | `growing` | `complex`
+5. If it is software: straight to main, or branches and PRs? → `main` | `branches`
+6. How should instructions be written: technical, with analogies, or a mix? → `technical` | `non-technical` | `mixed`
 7. In one sentence, what is this project for? Copy it exactly. Both onboard steps use that same sentence.
 
-Summarize the answers in 3 lines and wait for a yes. Then, from this repo root, with Node >= 22.6:
+Summarize the answers in 3 lines and wait for a yes. Then, from the project root, with Node >= 22.6:
+
+```bash
 HF="npx --yes git+https://github.com/MarioSQuilantan/harness-factory.git"
-1. $HF catalog refresh
-2. $HF onboard with --technical-level --project-kind --goal --target and, when they apply, --software-scope --workflow. Copy the "Plan id:" line.
-3. The same command, the same values, and the same --goal sentence, plus --accept-plan <that id>.
-4. $HF catalog suggest. Show the list. $HF catalog add <id> --install only what the person accepts. Do not install a flagged skill. Say that autoskills is CC-BY-NC.
-5. $HF install && $HF sync && $HF doctor
-"healthy" with "Onboarding readiness: pending" means the install is done. Do not say "done" if health is unhealthy or readiness is incomplete.
+$HF catalog refresh
+$HF onboard --technical-level <…> --project-kind <…> --goal "<same sentence>" --target <id,id> [--software-scope <…> --workflow <…>]
+# copy "Plan id:", then repeat the same command with --accept-plan <id>
+$HF catalog suggest
+$HF catalog add <id> --install
+$HF install && $HF sync && $HF doctor
 ```
+
+Install a catalog skill only after the person accepts it. Do not install a flagged skill. Say that autoskills is CC-BY-NC. `healthy` with `Onboarding readiness: pending` means the install is done. Do not say "done" if health is unhealthy or readiness is incomplete.
 
 If a failure is unclear, rerun the command with `--verbose` (or `HF_VERBOSE=1`).
 
