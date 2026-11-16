@@ -13,7 +13,7 @@ import { execFileSync, spawnSync } from 'node:child_process';
 // once published every notice already installed and every message already sent becomes true.
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
-const CLI = join(ROOT, 'scripts', 'rsc.js');
+const CLI = join(ROOT, 'scripts', 'harness-factory.js');
 const VERSION = JSON.parse(readFileSync(join(ROOT, 'package.json'), 'utf8')).version;
 const ARGS = ['--technical-level', 'non-technical', '--accompaniment', 'L2', '--project-kind', 'software',
   '--software-scope', 'growing', '--workflow', 'main', '--goal', 'prueba', '--target', 'claude'];

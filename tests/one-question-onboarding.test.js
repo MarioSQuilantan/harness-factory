@@ -15,7 +15,7 @@ import { verifyOnboarding } from '../scripts/lib/onboarding-apply.js';
 // never recorded, never suggested back.
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
-const CLI = join(ROOT, 'scripts', 'rsc.js');
+const CLI = join(ROOT, 'scripts', 'harness-factory.js');
 const run = (cwd, args) => spawnSync(process.execPath, [CLI, ...args], { cwd, encoding: 'utf8', input: '' });
 const BASE = ['onboard', '--target', 'claude', '--technical-level', 'non-technical',
   '--project-kind', 'operations', '--goal', 'Llevar la facturación'];

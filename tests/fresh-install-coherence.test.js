@@ -10,7 +10,7 @@ import { spawnSync } from 'node:child_process';
 // told the person that was not true, or contradicted itself about.
 
 const ROOT = new URL('..', import.meta.url).pathname;
-const CLI = join(ROOT, 'scripts/rsc.js');
+const CLI = join(ROOT, 'scripts/harness-factory.js');
 const VERSION = JSON.parse(readFileSync(join(ROOT, 'package.json'), 'utf8')).version;
 const git = (cwd, args) => spawnSync('git', args, { cwd, encoding: 'utf8' });
 const run = (cwd, args, opts = {}) => spawnSync(process.execPath, [CLI, ...args], { cwd, encoding: 'utf8', ...opts });

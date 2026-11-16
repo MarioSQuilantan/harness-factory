@@ -12,7 +12,7 @@ import { spawnSync } from 'node:child_process';
 // nobody touched survives silently.
 
 const ROOT = new URL('..', import.meta.url).pathname;
-const CLI = join(ROOT, 'scripts/rsc.js');
+const CLI = join(ROOT, 'scripts/harness-factory.js');
 const git = (cwd, args) => spawnSync('git', args, { cwd, encoding: 'utf8' });
 const run = (cwd, args) => spawnSync(process.execPath, [CLI, ...args], { cwd, encoding: 'utf8' });
 const ONBOARD = ['onboard', '--technical-level', 'technical', '--project-kind', 'software', '--goal', 'mini web de tareas',

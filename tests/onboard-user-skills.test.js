@@ -11,7 +11,7 @@ import { execFileSync, spawnSync } from 'node:child_process';
 // and after accepting, `/review` did something else and the user's own version sat in a backup nobody
 // told them about. `add` and `install` already refuse this; `onboard` never asked.
 
-const CLI = join(dirname(fileURLToPath(import.meta.url)), '..', 'scripts', 'rsc.js');
+const CLI = join(dirname(fileURLToPath(import.meta.url)), '..', 'scripts', 'harness-factory.js');
 const run = (cwd, args) => spawnSync(process.execPath, [CLI, ...args], { cwd, encoding: 'utf8', input: '' });
 const ARGS = ['onboard', '--target', 'claude', '--technical-level', 'non-technical',
   '--accompaniment', 'L3', '--project-kind', 'operations', '--goal', 'Llevar la facturación'];

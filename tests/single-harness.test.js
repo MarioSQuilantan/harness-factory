@@ -13,7 +13,7 @@ import { buildOnboardingPlan, normalizeOnboarding } from '../scripts/lib/onboard
 // first real request of every new install therefore stopped to install what the harness had just
 // demanded. One harness, installed whole, removes the question rather than improving the guess.
 const HERE = dirname(fileURLToPath(import.meta.url));
-const CLI = join(HERE, '..', 'scripts', 'rsc.js');
+const CLI = join(HERE, '..', 'scripts', 'harness-factory.js');
 const TMP = [];
 const scan = { schemaVersion: 1, signals: [], stacks: [], complexitySignals: [], sourceFileCount: 0, parentHarness: null };
 

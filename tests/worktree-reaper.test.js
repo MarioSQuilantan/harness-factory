@@ -15,7 +15,7 @@ import { fileURLToPath } from 'node:url';
 // refuse is not known to work.
 const HERE = dirname(fileURLToPath(import.meta.url));
 const MOD = join(HERE, '..', 'targets', 'worktree-reaper.mjs');
-const CLI = join(HERE, '..', 'scripts', 'rsc.js');
+const CLI = join(HERE, '..', 'scripts', 'harness-factory.js');
 
 const {
   classifyWorktrees, reapWorktree, isCleanupEnabled, resolveTrunk, listWorktrees, REGENERABLE, autoReap, installMergeHook, provenanceOf,

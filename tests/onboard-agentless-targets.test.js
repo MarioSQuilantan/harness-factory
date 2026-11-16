@@ -42,7 +42,7 @@ test('a policy with no agents expects none anywhere', () => {
 
 // The claim the unit test cannot make: that a real onboarding of the reported shape now COMPLETES.
 // Runs the CLI exactly as a person would, on a throwaway repo.
-const CLI = join(dirname(fileURLToPath(import.meta.url)), '..', 'scripts', 'rsc.js');
+const CLI = join(dirname(fileURLToPath(import.meta.url)), '..', 'scripts', 'harness-factory.js');
 const GOAL = 'backend python y frontend react';
 
 function onboard(cwd, args) {

@@ -11,7 +11,7 @@ import { classifyChange, computeCandidate, classifyCandidate, changeText } from 
 // which lived in `src/app.js` at tier 1. And it ran one reviewer where tier 2 asks for three.
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
-const CLI = join(ROOT, 'scripts', 'rsc.js');
+const CLI = join(ROOT, 'scripts', 'harness-factory.js');
 const GUARD = join(ROOT, 'targets', 'ship-guard.mjs');
 const HOME = mkdtempSync(join(tmpdir(), 'rsc-404-home-'));
 const ENV = { ...process.env, RSC_SELLO_HOME: HOME };

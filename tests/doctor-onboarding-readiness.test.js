@@ -11,7 +11,7 @@ import { execFileSync, spawnSync } from 'node:child_process';
 // gobierna `healthy` y el exit code) y preparación del onboarding (el suelo del plan aceptado más
 // los borradores) se reportan por separado; la segunda nunca cambia la primera.
 
-const CLI = join(dirname(fileURLToPath(import.meta.url)), '..', 'scripts', 'rsc.js');
+const CLI = join(dirname(fileURLToPath(import.meta.url)), '..', 'scripts', 'harness-factory.js');
 const CONSTITUTION = '02-DOCS/wiki/sdd/constitution.md';
 const run = (cwd, args) => spawnSync(process.execPath, [CLI, ...args], { cwd, encoding: 'utf8', input: '' });
 const argsFor = (scope) => ['onboard', '--target', 'claude', '--technical-level', 'technical',

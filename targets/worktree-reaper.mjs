@@ -14,7 +14,7 @@
 //   integration — does the branch still carry anything the trunk does not have?
 //   contents    — is there anything inside that was never in git and cannot be regenerated?
 //
-// Imported by `.rsc/session-start.mjs` (the sweep) and by `scripts/rsc.js` (`rsc worktrees`), so the
+// Imported by `.rsc/session-start.mjs` (the sweep) and by `scripts/harness-factory.js` (`rsc worktrees`), so the
 // rule exists once and both entry points cannot drift apart. Same shape as `sello.mjs`.
 import { readPolicy } from './risk-policy.mjs';
 import { existsSync, realpathSync, mkdirSync, readFileSync, readdirSync, writeFileSync, renameSync, chmodSync, copyFileSync } from 'node:fs';
@@ -756,7 +756,7 @@ export function summarize(candidate, root) {
   return `  ask   ${who} — ${why}; ask before removing`;
 }
 
-// CLI: `node worktree-reaper.mjs <root> [reap [path]]`. `scripts/rsc.js` is the public entry point;
+// CLI: `node worktree-reaper.mjs <root> [reap [path]]`. `scripts/harness-factory.js` is the public entry point;
 // this exists so the materialized copy in .rsc/ is runnable on its own.
 if (process.argv[1] && resolve(process.argv[1]) === resolve(new URL(import.meta.url).pathname)) {
   const root = resolve(process.argv[2] || process.cwd());

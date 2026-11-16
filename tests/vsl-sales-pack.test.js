@@ -21,7 +21,7 @@ test('VSL pack installs through existing multi-add and stays discoverable after 
     writeFileSync(join(project, '.codex', 'rsc', '.rsc-state.json'), JSON.stringify({
       skills: { orient: { files: [] } }, agents: [],
     }));
-    const run = (...args) => spawnSync(process.execPath, [join(root, 'scripts/rsc.js'), ...args], {
+    const run = (...args) => spawnSync(process.execPath, [join(root, 'scripts/harness-factory.js'), ...args], {
       cwd: project, encoding: 'utf8', timeout: 60000,
     });
     const installed = run('add', ...pack, '--target', 'codex');

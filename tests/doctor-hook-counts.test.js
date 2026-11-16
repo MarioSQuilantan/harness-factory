@@ -19,7 +19,7 @@ import { contextBudget, countHookEntries, RSC_HOOKS } from '../scripts/doctor.js
 //
 // Spec: 02-DOCS/wiki/sdd/specs/doctor-counts-hooks.md · Plan: doctor-counts-hooks.plan.md
 const HERE = dirname(fileURLToPath(import.meta.url));
-const CLI = join(HERE, '..', 'scripts', 'rsc.js');
+const CLI = join(HERE, '..', 'scripts', 'harness-factory.js');
 
 // A wired scope, built by hand so the separator style under test never depends on the host.
 function wiredScope({ style = 'posix', copies = 1, guard = true, extra = {} } = {}) {

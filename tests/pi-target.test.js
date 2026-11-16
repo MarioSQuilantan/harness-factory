@@ -12,7 +12,7 @@ import { targetHasAgents } from '../targets/agents.js';
 import { memoryModeFor } from '../targets/memory.js';
 
 const json = (file) => JSON.parse(readFileSync(file, 'utf8'));
-const CLI = join(dirname(fileURLToPath(import.meta.url)), '..', 'scripts', 'rsc.js');
+const CLI = join(dirname(fileURLToPath(import.meta.url)), '..', 'scripts', 'harness-factory.js');
 function project(t) {
   const cwd = mkdtempSync(join(tmpdir(), 'rsc-pi-'));
   t.after(() => rmSync(cwd, { recursive: true, force: true }));

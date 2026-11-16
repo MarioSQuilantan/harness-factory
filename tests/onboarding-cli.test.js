@@ -10,7 +10,7 @@ const preToolUseGuards = (settings) => (settings.hooks.PreToolUse || [])
   .flatMap((e) => e.hooks.map((h) => /\.rsc\/([a-z-]+)\.mjs/.exec(h.command)?.[1]).filter(Boolean)).sort();
 
 const ROOT = new URL('..', import.meta.url).pathname;
-const CLI = join(ROOT, 'scripts/rsc.js');
+const CLI = join(ROOT, 'scripts/harness-factory.js');
 const fresh = () => mkdtempSync(join(tmpdir(), 'rsc-onboard-cli-'));
 const run = (cwd, args, input) => spawnSync(process.execPath, [CLI, ...args], { cwd, input, encoding: 'utf8' });
 const complete = [

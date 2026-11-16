@@ -415,7 +415,7 @@ test('ks40 · an install puts the module next to the adapter, and the CLI switch
   assert.ok(existsSync(join(eric, '.rsc', 'knowledge-sync.mjs')), 'the adapter imports it: missing, the memory breaks too');
   assert.equal(inactiveReason(eric), null, 'on by default after an install');
 
-  const cli = (...args) => execFileSync(process.execPath, [join(import.meta.dirname, '..', 'scripts', 'rsc.js'), ...args],
+  const cli = (...args) => execFileSync(process.execPath, [join(import.meta.dirname, '..', 'scripts', 'harness-factory.js'), ...args],
     { cwd: eric, encoding: 'utf8', stdio: ['ignore', 'pipe', 'pipe'] });
   cli('knowledge-sync', 'off');
   assert.ok(existsSync(join(eric, '.rsc', OPT_OUT)));

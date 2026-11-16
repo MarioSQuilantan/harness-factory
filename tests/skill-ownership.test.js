@@ -14,7 +14,7 @@ import { fileURLToPath } from 'node:url';
 // Reported by a user, reproduced here on 2026-09-17: a skill added after onboarding disappears on
 // the next sync, because `add` updates one list of governed skills and `sync` reads another.
 const HERE = dirname(fileURLToPath(import.meta.url));
-const CLI = join(HERE, '..', 'scripts', 'rsc.js');
+const CLI = join(HERE, '..', 'scripts', 'harness-factory.js');
 const TMP = [];
 
 function rsc(cwd, ...args) {

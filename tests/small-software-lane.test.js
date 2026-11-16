@@ -11,7 +11,7 @@ import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { decide, classify, NUDGE } from '../targets/ftd-nudge.mjs';
 
-const CLI = join(dirname(fileURLToPath(import.meta.url)), '..', 'scripts', 'rsc.js');
+const CLI = join(dirname(fileURLToPath(import.meta.url)), '..', 'scripts', 'harness-factory.js');
 const run = (cwd, args) => spawnSync(process.execPath, [CLI, ...args], { cwd, encoding: 'utf8', input: '' });
 
 function onboarded({ kind = 'software', scope = 'small', level = 'technical' } = {}) {

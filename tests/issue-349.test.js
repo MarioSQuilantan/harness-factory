@@ -164,7 +164,7 @@ test('349 gate checks git -C target instead of workspace branch', () => {
     /feat\/login/,
   );
 });
-const CLI = new URL('../scripts/rsc.js', import.meta.url).pathname;
+const CLI = new URL('../scripts/harness-factory.js', import.meta.url).pathname;
 test('349 external CLI branch gate distinguishes denial, allow and environment error', () => {
   const d = repo('main');
   git(d, 'switch', '-qc', 'feat/login');

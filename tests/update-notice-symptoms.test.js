@@ -15,7 +15,7 @@ import { spawnSync } from 'node:child_process';
 // sees a red error after every turn updates when told that is what the update fixes.
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
-const CLI = join(ROOT, 'scripts', 'rsc.js');
+const CLI = join(ROOT, 'scripts', 'harness-factory.js');
 const SESSION_START = join(ROOT, 'targets', 'session-start.mjs');
 const PKG = JSON.parse(readFileSync(join(ROOT, 'package.json'), 'utf8'));
 

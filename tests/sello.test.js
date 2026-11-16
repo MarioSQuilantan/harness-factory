@@ -19,7 +19,7 @@ import {
 const HERE = dirname(fileURLToPath(import.meta.url));
 const REPO = join(HERE, '..');
 const SHIP_GUARD = join(REPO, 'targets', 'ship-guard.mjs');
-const RSC = join(REPO, 'scripts', 'rsc.js');
+const RSC = join(REPO, 'scripts', 'harness-factory.js');
 
 // --- fixture: a real git repo with a trunk and a feature branch -----------------
 

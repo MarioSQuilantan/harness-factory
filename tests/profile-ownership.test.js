@@ -15,7 +15,7 @@ import { execFileSync, spawnSync } from 'node:child_process';
 // now retired altogether: `technical_level` is the one dial, and both old names are removed on
 // rewrite. The intent of #276 still holds — one name for the dial, the one every skill reads.
 
-const CLI = join(dirname(fileURLToPath(import.meta.url)), '..', 'scripts', 'rsc.js');
+const CLI = join(dirname(fileURLToPath(import.meta.url)), '..', 'scripts', 'harness-factory.js');
 const run = (cwd, args) => spawnSync(process.execPath, [CLI, ...args], { cwd, encoding: 'utf8', input: '' });
 const base = (level = 'non-technical', targets = 'claude') => ['onboard', '--target', targets, '--technical-level', level,
   '--project-kind', 'operations', '--goal', 'Llevar la facturación'];

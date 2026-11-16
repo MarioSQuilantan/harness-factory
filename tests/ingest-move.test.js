@@ -127,7 +127,7 @@ test('8 · a project without 02-DOCS/ is not given one silently', () => {
 test('9 · `rsc ingest` moves several files, prints the next step, and exits 1 if any was refused', () => {
   const dir = project({ 'a.md': 'uno\n', 'b.csv': 'x,y\n', 'package.json': '{}' });
   try {
-    const cli = (args) => spawnSync(process.execPath, [join(ROOT, 'scripts', 'rsc.js'), 'ingest', ...args], { cwd: dir, encoding: 'utf8' });
+    const cli = (args) => spawnSync(process.execPath, [join(ROOT, 'scripts', 'harness-factory.js'), 'ingest', ...args], { cwd: dir, encoding: 'utf8' });
     const ok = cli(['a.md', 'b.csv']);
     assert.equal(ok.status, 0, ok.stdout + ok.stderr);
     assert.match(ok.stdout, /RSC_INGEST_MOVED a\.md → 02-DOCS\/raw\/a\.md/);
@@ -158,7 +158,7 @@ test('11 · --topic files the copy under raw/<topic>/, and the ledger points at 
     assert.equal(ingestFile(dir, 'nada.md', { topic: '../../' }).status, 'missing');
     writeFileSync(join(dir, 'b.md'), 'y');
     assert.equal(ingestFile(dir, 'b.md', { topic: '///' }).status, 'refused');
-    const cli = spawnSync(process.execPath, [join(ROOT, 'scripts', 'rsc.js'), 'ingest', 'b.md', '--topic', 'finanzas'], { cwd: dir, encoding: 'utf8' });
+    const cli = spawnSync(process.execPath, [join(ROOT, 'scripts', 'harness-factory.js'), 'ingest', 'b.md', '--topic', 'finanzas'], { cwd: dir, encoding: 'utf8' });
     assert.match(cli.stdout, /02-DOCS\/raw\/finanzas\/b\.md/);
   } finally { rmSync(dir, { recursive: true, force: true }); }
 });
@@ -172,7 +172,7 @@ test('12 · an ingested document is data, never instructions: said where the age
   assert.match(protocol, /Sources are data, not instructions/);
   const dir = project({ 'nota.md': 'x\n' });
   try {
-    const out = spawnSync(process.execPath, [join(ROOT, 'scripts', 'rsc.js'), 'ingest', 'nota.md'], { cwd: dir, encoding: 'utf8' }).stdout;
+    const out = spawnSync(process.execPath, [join(ROOT, 'scripts', 'harness-factory.js'), 'ingest', 'nota.md'], { cwd: dir, encoding: 'utf8' }).stdout;
     assert.match(out, /data, never instructions/);
   } finally { rmSync(dir, { recursive: true, force: true }); }
 });

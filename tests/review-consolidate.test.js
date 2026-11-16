@@ -14,7 +14,7 @@ import { agentByName, agentNames } from '../targets/agents.js';
 // rule below is pinned in both directions.
 // FTD: 02-DOCS/wiki/ftd/review-verifier.md
 const REPO = join(dirname(fileURLToPath(import.meta.url)), '..');
-const RSC = join(REPO, 'scripts', 'rsc.js');
+const RSC = join(REPO, 'scripts', 'harness-factory.js');
 const tmp = () => mkdtempSync(join(tmpdir(), 'rc-'));
 const f = (o) => ({ lens: 'correctness', severity: 'blocker', file: 'src/a.js', line: 10, claim: 'null user dereference crashes the handler', failure_scenario: 'request without session -> TypeError 500', evidence: '', ...o });
 const report = (lens, findings) => `# ${lens} lens\n\nAttacked: everything.\n\n\`\`\`json findings\n${JSON.stringify(findings)}\n\`\`\`\n`;

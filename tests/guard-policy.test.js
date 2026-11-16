@@ -15,7 +15,7 @@ import { execFileSync, spawnSync } from 'node:child_process';
 // #274 — `repair` reinstalled with no policy, so the hooks the plan had declined were wired, and the
 // next `sync`, which does pass the policy, took them away again.
 
-const CLI = join(dirname(fileURLToPath(import.meta.url)), '..', 'scripts', 'rsc.js');
+const CLI = join(dirname(fileURLToPath(import.meta.url)), '..', 'scripts', 'harness-factory.js');
 const run = (cwd, args) => spawnSync(process.execPath, [CLI, ...args], { cwd, encoding: 'utf8', input: '' });
 
 function onboarded({ level, kind }) {

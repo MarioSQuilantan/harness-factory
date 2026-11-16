@@ -21,7 +21,7 @@ import { TARGET_IDS } from '../targets/index.js';
 import { SELLO_STATE_PATHS } from '../targets/sello.mjs';
 
 const REPO = join(dirname(fileURLToPath(import.meta.url)), '..');
-const RSC = join(REPO, 'scripts', 'rsc.js');
+const RSC = join(REPO, 'scripts', 'harness-factory.js');
 const SUGGEST = join(REPO, 'skills', 'suggest', 'SKILL.md');
 
 const tmp = (p = 'rsc-caps-') => mkdtempSync(join(tmpdir(), p));

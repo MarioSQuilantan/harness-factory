@@ -31,7 +31,7 @@ function repo(p) {
   execFileSync('git', ['init', '-q', '-b', 'main'], { cwd });
   return cwd;
 }
-const cli = (cwd, ...args) => spawnSync(process.execPath, [join(ROOT, 'scripts', 'rsc.js'), ...args], {
+const cli = (cwd, ...args) => spawnSync(process.execPath, [join(ROOT, 'scripts', 'harness-factory.js'), ...args], {
   cwd, encoding: 'utf8', env: { ...process.env, HOME: cwd },
 });
 

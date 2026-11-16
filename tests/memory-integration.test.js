@@ -12,7 +12,7 @@ import { capabilities } from '../scripts/lib/capabilities.js';
 import { doctor } from '../scripts/doctor.js';
 import { capture } from '../targets/session-memory-core.mjs';
 
-const CLI = join(process.cwd(), 'scripts', 'rsc.js');
+const CLI = join(process.cwd(), 'scripts', 'harness-factory.js');
 const git = (cwd, args) => execFileSync('git', args, { cwd, encoding: 'utf8' }).trim();
 function repo() {
   const cwd = mkdtempSync(join(tmpdir(), 'rsc-memory-integration-'));

@@ -12,7 +12,7 @@ import { isPushOrPr } from '../targets/asdd-gate.mjs';
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
 const GUARD = join(ROOT, 'targets', 'ship-guard.mjs');
-const CLI = join(ROOT, 'scripts', 'rsc.js');
+const CLI = join(ROOT, 'scripts', 'harness-factory.js');
 const git = (cwd, ...a) => execFileSync('git', a, { cwd, stdio: ['ignore', 'pipe', 'pipe'] }).toString();
 const write = (root, rel, body = 'x\n') => { mkdirSync(dirname(join(root, rel)), { recursive: true }); writeFileSync(join(root, rel), body); };
 const HOME = mkdtempSync(join(tmpdir(), 'rsc-403-home-'));

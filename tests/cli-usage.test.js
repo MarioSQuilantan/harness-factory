@@ -10,7 +10,7 @@ import { spawnSync } from 'node:child_process';
 // must not look like one that succeeded, and asking for help must never run the command.
 
 const ROOT = new URL('..', import.meta.url).pathname;
-const CLI = join(ROOT, 'scripts/rsc.js');
+const CLI = join(ROOT, 'scripts/harness-factory.js');
 const run = (cwd, args) => spawnSync(process.execPath, [CLI, ...args], { cwd, encoding: 'utf8' });
 const fresh = () => mkdtempSync(join(tmpdir(), 'rsc-usage-'));
 

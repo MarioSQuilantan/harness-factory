@@ -183,7 +183,7 @@ test('gp12 · off removes rsc\'s entries from both formats and nothing of the pe
 });
 
 const ROOT = join(import.meta.dirname, '..');
-const cli = (cwd, args) => execFileSync(process.execPath, [join(ROOT, 'scripts', 'rsc.js'), 'git-permissions', ...args], {
+const cli = (cwd, args) => execFileSync(process.execPath, [join(ROOT, 'scripts', 'harness-factory.js'), 'git-permissions', ...args], {
   cwd, encoding: 'utf8', env: { ...process.env, RSC_OPENCODE_MAJOR: '2' },
 });
 

@@ -14,7 +14,7 @@ import { say, setPlainOutput, sparkleGlyphs } from '../scripts/lib/ui.js';
 import { KNOWLEDGE_IMPORT } from '../targets/session-memory-core.mjs';
 
 const ROOT = new URL('..', import.meta.url).pathname;
-const CLI = join(ROOT, 'scripts/rsc.js');
+const CLI = join(ROOT, 'scripts/harness-factory.js');
 const GUARD = join(ROOT, 'targets', 'gitmoji-guard.mjs');
 const fresh = (p = 'rsc-emoji-r1-') => mkdtempSync(join(tmpdir(), p));
 const run = (cwd, args) => spawnSync(process.execPath, [CLI, ...args], { cwd, encoding: 'utf8', env: { ...process.env, RSC_NO_UPDATE_CHECK: '1' } });

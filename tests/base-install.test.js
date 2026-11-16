@@ -12,7 +12,7 @@ import { buildTextCorpus, cosine } from '../scripts/lib/text-rank.js';
 // hand-kept enumeration in a label is parallel accounting (P3) and it lies quietly.
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
 const manifest = JSON.parse(readFileSync(join(ROOT, 'manifest.json'), 'utf8'));
-const rscCli = readFileSync(join(ROOT, 'scripts/rsc.js'), 'utf8');
+const rscCli = readFileSync(join(ROOT, 'scripts/harness-factory.js'), 'utf8');
 const readme = readFileSync(join(ROOT, 'README.md'), 'utf8');
 
 // The set, spelled out once. Changing the base install means changing this line ON PURPOSE.

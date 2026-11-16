@@ -346,7 +346,7 @@ test('tsd40 · «desbloquea main» and «no uses worktrees» become project deci
   const r = repo(); write(r, 'Dockerfile');
   await applyInstall({ skillIds: ['suggest', 'orient'], target: 'claude', home: r, cwd: r });
   for (const f of ['branch-guard.mjs', 'trunk-policy.mjs', 'team-safe-start.mjs']) assert.ok(existsSync(join(r, '.rsc', f)), `${f} installed`);
-  const cli = (...a) => execFileSync(process.execPath, [join(import.meta.dirname, '..', 'scripts', 'rsc.js'), ...a], { cwd: r, encoding: 'utf8', stdio: ['ignore', 'pipe', 'pipe'] });
+  const cli = (...a) => execFileSync(process.execPath, [join(import.meta.dirname, '..', 'scripts', 'harness-factory.js'), ...a], { cwd: r, encoding: 'utf8', stdio: ['ignore', 'pipe', 'pipe'] });
   assert.equal(JSON.parse(cli('main', 'status')).closed, true);
   cli('main', 'unlock');
   cli('isolation', 'off');

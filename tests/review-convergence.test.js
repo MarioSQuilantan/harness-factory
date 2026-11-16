@@ -8,7 +8,7 @@ import { spawnSync } from 'node:child_process';
 import * as L from '../scripts/lib/review-ledger.js';
 import { consolidate } from '../scripts/lib/review-findings.js';
 
-const CLI = join(dirname(fileURLToPath(import.meta.url)), '../scripts/rsc.js');
+const CLI = join(dirname(fileURLToPath(import.meta.url)), '../scripts/harness-factory.js');
 const repo = () => mkdtempSync(join(tmpdir(), 'rsc-review-convergence-'));
 const run = (root, ...args) => spawnSync(process.execPath, [CLI, 'review', 'ledger', ...args], { cwd: root, encoding: 'utf8' });
 const findings = [

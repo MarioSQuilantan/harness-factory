@@ -12,7 +12,7 @@ import { LEDGER_PATH } from '../scripts/lib/review-ledger.js';
 // Spec: 02-DOCS/wiki/sdd/specs/asdd-v4.md (criteria 3–7). Every gate is shown failing AND passing.
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
-const CLI = join(ROOT, 'scripts', 'rsc.js');
+const CLI = join(ROOT, 'scripts', 'harness-factory.js');
 const HOME = mkdtempSync(join(tmpdir(), 'rsc-asdd-home-'));
 const run = (cwd, args, input = '') => spawnSync(process.execPath, [CLI, ...args], {
   cwd, encoding: 'utf8', input, env: { ...process.env, RSC_SELLO_HOME: HOME },

@@ -17,7 +17,7 @@ const adoptExistingHarness = (cwd) => {
 
 test('rsc registry refresh/status CLI writes project registry', () => {
   const cwd = mkdtempSync(join(tmpdir(), 'rsc-cli-'));
-  const refresh = spawnSync(process.execPath, [join(ROOT, 'scripts/rsc.js'), 'registry', 'refresh', '--target', 'codex'], {
+  const refresh = spawnSync(process.execPath, [join(ROOT, 'scripts/harness-factory.js'), 'registry', 'refresh', '--target', 'codex'], {
     cwd,
     encoding: 'utf8',
   });
@@ -26,7 +26,7 @@ test('rsc registry refresh/status CLI writes project registry', () => {
   assert.ok(existsSync(join(cwd, '.rsc', 'skill-registry.json')));
   assert.ok(existsSync(join(cwd, '.rsc', 'skill-registry.md')));
 
-  const status = spawnSync(process.execPath, [join(ROOT, 'scripts/rsc.js'), 'registry', 'status'], {
+  const status = spawnSync(process.execPath, [join(ROOT, 'scripts/harness-factory.js'), 'registry', 'status'], {
     cwd,
     encoding: 'utf8',
   });
@@ -35,7 +35,7 @@ test('rsc registry refresh/status CLI writes project registry', () => {
 });
 
 test('rsc consult prioritizes explicit query over repo hints', () => {
-  const result = spawnSync(process.execPath, [join(ROOT, 'scripts/rsc.js'), 'consult', 'ejecutar Python en GPU serverless'], {
+  const result = spawnSync(process.execPath, [join(ROOT, 'scripts/harness-factory.js'), 'consult', 'ejecutar Python en GPU serverless'], {
     cwd: ROOT,
     encoding: 'utf8',
   });
@@ -44,7 +44,7 @@ test('rsc consult prioritizes explicit query over repo hints', () => {
 });
 
 test('rsc consult recommends bootstrap and web skills for a new website intent', () => {
-  const result = spawnSync(process.execPath, [join(ROOT, 'scripts/rsc.js'), 'consult', 'quiero montar una pagina web para vender cursos online'], {
+  const result = spawnSync(process.execPath, [join(ROOT, 'scripts/harness-factory.js'), 'consult', 'quiero montar una pagina web para vender cursos online'], {
     cwd: ROOT,
     encoding: 'utf8',
   });
@@ -62,7 +62,7 @@ test('rsc consult recommends bootstrap and web skills for a new website intent',
 
 
 test('rsc catalog dumps the full catalog with install state and descriptions', () => {
-  const result = spawnSync(process.execPath, [join(ROOT, 'scripts/rsc.js'), 'catalog'], {
+  const result = spawnSync(process.execPath, [join(ROOT, 'scripts/harness-factory.js'), 'catalog'], {
     cwd: ROOT,
     encoding: 'utf8',
   });
@@ -77,10 +77,10 @@ test('rsc catalog dumps the full catalog with install state and descriptions', (
 test('rsc catalog --available hides skills already installed', () => {
   const cwd = mkdtempSync(join(tmpdir(), 'rsc-cli-catalog-'));
   adoptExistingHarness(cwd);
-  const install = spawnSync(process.execPath, [join(ROOT, 'scripts/rsc.js'), 'add', 'fastapi', '--target', 'claude'], { cwd, encoding: 'utf8' });
+  const install = spawnSync(process.execPath, [join(ROOT, 'scripts/harness-factory.js'), 'add', 'fastapi', '--target', 'claude'], { cwd, encoding: 'utf8' });
   assert.equal(install.status, 0, install.stderr);
-  const all = spawnSync(process.execPath, [join(ROOT, 'scripts/rsc.js'), 'catalog', '--target', 'claude'], { cwd, encoding: 'utf8' });
-  const avail = spawnSync(process.execPath, [join(ROOT, 'scripts/rsc.js'), 'catalog', '--available', '--target', 'claude'], { cwd, encoding: 'utf8' });
+  const all = spawnSync(process.execPath, [join(ROOT, 'scripts/harness-factory.js'), 'catalog', '--target', 'claude'], { cwd, encoding: 'utf8' });
+  const avail = spawnSync(process.execPath, [join(ROOT, 'scripts/harness-factory.js'), 'catalog', '--available', '--target', 'claude'], { cwd, encoding: 'utf8' });
   assert.ok(all.stdout.includes('fastapi\tinstalled\t'), 'full catalog marks fastapi installed');
   assert.ok(!avail.stdout.split('\n').some((l) => l.startsWith('fastapi\t')), '--available drops the installed fastapi');
 });
@@ -88,13 +88,13 @@ test('rsc catalog --available hides skills already installed', () => {
 test('rsc backups lists project-local snapshots', () => {
   const cwd = mkdtempSync(join(tmpdir(), 'rsc-cli-backups-'));
   adoptExistingHarness(cwd);
-  const install = spawnSync(process.execPath, [join(ROOT, 'scripts/rsc.js'), 'add', 'fastapi', '--target', 'claude'], {
+  const install = spawnSync(process.execPath, [join(ROOT, 'scripts/harness-factory.js'), 'add', 'fastapi', '--target', 'claude'], {
     cwd,
     encoding: 'utf8',
   });
   assert.equal(install.status, 0, install.stderr);
 
-  const listed = spawnSync(process.execPath, [join(ROOT, 'scripts/rsc.js'), 'backups'], {
+  const listed = spawnSync(process.execPath, [join(ROOT, 'scripts/harness-factory.js'), 'backups'], {
     cwd,
     encoding: 'utf8',
   });
@@ -107,13 +107,13 @@ test('rsc backups lists project-local snapshots', () => {
 test('rsc restore latest --dry-run reports planned restore paths without mutating', () => {
   const cwd = mkdtempSync(join(tmpdir(), 'rsc-cli-restore-'));
   adoptExistingHarness(cwd);
-  const install = spawnSync(process.execPath, [join(ROOT, 'scripts/rsc.js'), 'add', 'fastapi', '--target', 'claude'], {
+  const install = spawnSync(process.execPath, [join(ROOT, 'scripts/harness-factory.js'), 'add', 'fastapi', '--target', 'claude'], {
     cwd,
     encoding: 'utf8',
   });
   assert.equal(install.status, 0, install.stderr);
 
-  const preview = spawnSync(process.execPath, [join(ROOT, 'scripts/rsc.js'), 'restore', 'latest', '--dry-run'], {
+  const preview = spawnSync(process.execPath, [join(ROOT, 'scripts/harness-factory.js'), 'restore', 'latest', '--dry-run'], {
     cwd,
     encoding: 'utf8',
   });
@@ -126,13 +126,13 @@ test('rsc restore latest --dry-run reports planned restore paths without mutatin
 test('rsc sync --dry-run reports installed skills', () => {
   const cwd = mkdtempSync(join(tmpdir(), 'rsc-cli-sync-'));
   adoptExistingHarness(cwd);
-  const install = spawnSync(process.execPath, [join(ROOT, 'scripts/rsc.js'), 'add', 'fastapi', '--target', 'claude'], {
+  const install = spawnSync(process.execPath, [join(ROOT, 'scripts/harness-factory.js'), 'add', 'fastapi', '--target', 'claude'], {
     cwd,
     encoding: 'utf8',
   });
   assert.equal(install.status, 0, install.stderr);
 
-  const sync = spawnSync(process.execPath, [join(ROOT, 'scripts/rsc.js'), 'sync', '--target', 'claude', '--dry-run'], {
+  const sync = spawnSync(process.execPath, [join(ROOT, 'scripts/harness-factory.js'), 'sync', '--target', 'claude', '--dry-run'], {
     cwd,
     encoding: 'utf8',
   });
@@ -145,7 +145,7 @@ test('rsc sync --dry-run reports installed skills', () => {
 test('rsc install prints the agent handoff (reload → equipped → ready, no auto-task)', () => {
   const cwd = mkdtempSync(join(tmpdir(), 'rsc-cli-handoff-'));
   adoptExistingHarness(cwd);
-  const result = spawnSync(process.execPath, [join(ROOT, 'scripts/rsc.js'), 'install', '--target', 'claude'], {
+  const result = spawnSync(process.execPath, [join(ROOT, 'scripts/harness-factory.js'), 'install', '--target', 'claude'], {
     cwd,
     encoding: 'utf8',
   });
@@ -162,7 +162,7 @@ test('rsc install prints the agent handoff (reload → equipped → ready, no au
 test('rsc add nudges to reload so the new skill activates', () => {
   const cwd = mkdtempSync(join(tmpdir(), 'rsc-cli-add-reload-'));
   adoptExistingHarness(cwd);
-  const result = spawnSync(process.execPath, [join(ROOT, 'scripts/rsc.js'), 'add', 'fastapi', '--target', 'claude'], {
+  const result = spawnSync(process.execPath, [join(ROOT, 'scripts/harness-factory.js'), 'add', 'fastapi', '--target', 'claude'], {
     cwd,
     encoding: 'utf8',
   });
@@ -174,7 +174,7 @@ test('rsc add nudges to reload so the new skill activates', () => {
 test('rsc add/uninstall accepts an agent id as a first-class unit', () => {
   const cwd = mkdtempSync(join(tmpdir(), 'rsc-cli-agent-'));
   adoptExistingHarness(cwd);
-  const add = spawnSync(process.execPath, [join(ROOT, 'scripts/rsc.js'), 'add', 'go-reviewer', '--target', 'claude'], {
+  const add = spawnSync(process.execPath, [join(ROOT, 'scripts/harness-factory.js'), 'add', 'go-reviewer', '--target', 'claude'], {
     cwd, encoding: 'utf8',
   });
   assert.equal(add.status, 0, add.stderr);
@@ -182,7 +182,7 @@ test('rsc add/uninstall accepts an agent id as a first-class unit', () => {
   const manifest = JSON.parse(readFileSync(join(cwd, '.rsc.json'), 'utf8'));
   assert.deepEqual(manifest.agents, ['go-reviewer']);
 
-  const remove = spawnSync(process.execPath, [join(ROOT, 'scripts/rsc.js'), 'uninstall', 'go-reviewer', '--target', 'claude'], {
+  const remove = spawnSync(process.execPath, [join(ROOT, 'scripts/harness-factory.js'), 'uninstall', 'go-reviewer', '--target', 'claude'], {
     cwd, encoding: 'utf8',
   });
   assert.equal(remove.status, 0, remove.stderr);
@@ -192,7 +192,7 @@ test('rsc add/uninstall accepts an agent id as a first-class unit', () => {
 test('rsc add suggests close agent ids instead of exposing a raw skill error', () => {
   const cwd = mkdtempSync(join(tmpdir(), 'rsc-cli-agent-typo-'));
   adoptExistingHarness(cwd);
-  const result = spawnSync(process.execPath, [join(ROOT, 'scripts/rsc.js'), 'add', 'go-reviwer', '--target', 'claude'], {
+  const result = spawnSync(process.execPath, [join(ROOT, 'scripts/harness-factory.js'), 'add', 'go-reviwer', '--target', 'claude'], {
     cwd, encoding: 'utf8',
   });
   assert.equal(result.status, 1);
@@ -202,7 +202,7 @@ test('rsc add suggests close agent ids instead of exposing a raw skill error', (
 
 test('rsc upgrade --dry-run prints npm upgrade command', () => {
   const cwd = mkdtempSync(join(tmpdir(), 'rsc-cli-upgrade-'));
-  const result = spawnSync(process.execPath, [join(ROOT, 'scripts/rsc.js'), 'upgrade', '--target', 'claude', '--dry-run'], {
+  const result = spawnSync(process.execPath, [join(ROOT, 'scripts/harness-factory.js'), 'upgrade', '--target', 'claude', '--dry-run'], {
     cwd,
     encoding: 'utf8',
   });

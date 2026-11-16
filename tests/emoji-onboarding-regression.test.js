@@ -6,7 +6,7 @@ import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { spawnSync } from 'node:child_process';
 
-const CLI = fileURLToPath(new URL('../scripts/rsc.js', import.meta.url));
+const CLI = fileURLToPath(new URL('../scripts/harness-factory.js', import.meta.url));
 const answers = ['onboard', '--technical-level', 'technical', '--project-kind', 'software',
   '--software-scope', 'small', '--workflow', 'main', '--goal', 'A calculator', '--target', 'claude'];
 const run = (cwd, args) => spawnSync(process.execPath, [CLI, ...args], {

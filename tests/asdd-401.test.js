@@ -10,7 +10,7 @@ import { computeCandidate } from '../targets/sello.mjs';
 // What the first real ASDD run broke. Spec: 02-DOCS/wiki/sdd/specs/asdd-401.md (criteria 1–4).
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
-const CLI = join(ROOT, 'scripts', 'rsc.js');
+const CLI = join(ROOT, 'scripts', 'harness-factory.js');
 const BRIEF = join(ROOT, 'skills', 'implement', 'scripts', 'task-brief');
 const HOME = mkdtempSync(join(tmpdir(), 'rsc-401-home-'));
 const run = (cwd, args) => spawnSync(process.execPath, [CLI, ...args], { cwd, encoding: 'utf8', input: '', env: { ...process.env, RSC_SELLO_HOME: HOME } });

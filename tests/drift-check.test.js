@@ -96,8 +96,8 @@ test('drift-check: every noise class is skipped', () => {
       '[d](../../raw/brand/sample.md)',   // the installed user's project
       '[e](.rsc/sello.json)',             // born at runtime
       '[f](~/.rsc/sello-config.json)',    // runtime, home-relative
-      '[g](scripts/rsc.js:80)',           // line anchor: the file exists, the line moves
-      '[h](scripts/rsc.js#generatedHookFiles)',
+      '[g](scripts/harness-factory.js:80)',           // line anchor: the file exists, the line moves
+      '[h](scripts/harness-factory.js#generatedHookFiles)',
     ].join('\n\n') + '\n',
   });
   assert.deepEqual(checkCatalog({ root }).findings, []);

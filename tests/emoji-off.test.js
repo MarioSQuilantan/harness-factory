@@ -12,7 +12,7 @@ import { plain, emojiOff, NO_EMOJI_RULE, noEmojiBody } from '../targets/emoji-po
 import { PROJECT_OPT_OUTS } from '../targets/opt-outs.js';
 
 const ROOT = new URL('..', import.meta.url).pathname;
-const CLI = join(ROOT, 'scripts/rsc.js');
+const CLI = join(ROOT, 'scripts/harness-factory.js');
 const GUARD = join(ROOT, 'targets', 'gitmoji-guard.mjs');
 const START = join(ROOT, 'targets', 'session-start.mjs');
 const PICTO = /\p{Extended_Pictographic}/u;

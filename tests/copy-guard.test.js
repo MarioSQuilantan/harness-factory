@@ -157,7 +157,7 @@ test('11 · a broken input fails open', () => {
 test('12 · `rsc copy check` exits 1 with the hit and its rule, 0 on clean text', () => {
   const dir = project({ '02-DOCS/wiki/harness/decisions.md': CARLOS_DECISIONS, 'ad.txt': 'Línea uno.\nNo es para vender a cualquiera.\n', 'ok.txt': 'Diagnóstico sereno.\n' });
   try {
-    const cli = (args) => spawnSync(process.execPath, [join(ROOT, 'scripts', 'rsc.js'), 'copy', ...args], { cwd: dir, encoding: 'utf8' });
+    const cli = (args) => spawnSync(process.execPath, [join(ROOT, 'scripts', 'harness-factory.js'), 'copy', ...args], { cwd: dir, encoding: 'utf8' });
     const bad = cli(['check', 'ad.txt']);
     assert.equal(bad.status, 1, bad.stdout + bad.stderr);
     assert.match(bad.stdout, /vender a cualquiera/);
