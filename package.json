@@ -24,7 +24,6 @@
   "files": [
     "scripts",
     "targets",
-    "schema",
     "manifest.json",
     "packaged-skills",
     "!**/__pycache__/**",

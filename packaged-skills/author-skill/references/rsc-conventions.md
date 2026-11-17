@@ -16,7 +16,6 @@ packaged-skills/<id>/           ← essential skills that ship with every instal
   scripts/verify.sh             ← only if the skill has a checkable artifact
 
 manifest.json                   ← stub; the live catalog is autoskills, not a generated index
-schema/frontmatter.schema.json  ← frontmatter shape a SKILL.md should satisfy
 ```
 
 Rule: **edit an essential skill under `packaged-skills/<id>/`.** Domain skills
@@ -26,7 +25,7 @@ hand-written skill index.
 
 ## Frontmatter — the catalog contract
 
-Every `SKILL.md` frontmatter MUST satisfy `schema/frontmatter.schema.json`:
+Every `SKILL.md` frontmatter uses this shape:
 
 ```yaml
 ---
