@@ -78,7 +78,7 @@ Later phases use it as a cheap index — id, trigger, tags, path, installed/avai
 
 Calibration is the moment to make sure the relevant skills are actually present, not just indexed. Detect → propose → install:
 
-1. **Detect what this repo needs.** Use the stack you just detected, or ask the CLI: `npx --yes git+https://github.com/MarioSQuilantan/harness-factory.git consult "<one line: stack + what we're building>"`. Map signals to skills — e.g. `next`→`nextjs`+`design`, `go.mod`→`go`, FastAPI→`fastapi`, `*.sql`/Prisma→`postgresdb`/`prisma-orm`, Stripe→`stripe`, Dockerfile/CI→`docker`/`github-actions`, tests→`testing-*`/`e2e-testing`. The SDD phase skills (`specify`…`ship`) should already be present from `--profile core`; install any that are missing.
+1. **Detect what this repo needs.** Use the stack you just detected, or ask the CLI: `npx --yes git+https://github.com/MarioSQuilantan/harness-factory.git consult "<one line: stack + what we're building>"`. Map signals to skills — e.g. `next`→`nextjs`+`design`, `go.mod`→`go`, FastAPI→`fastapi`, `*.sql`/Prisma→`postgresdb`/`prisma-orm`, Stripe→`stripe`, Dockerfile/CI→`docker`/`github-actions`, tests→`testing-*`/`e2e-testing`. The SDD phase skills (`specify`…`ship`) ship with every install. If one is missing, wire the harness with `install`.
 2. **Show the shortlist + confirm.** List the skills with a one-line *why* each, in the user's register, and get a one-word confirm before touching their environment.
 3. **Install them yourself.** You have a terminal — run it via Bash:
    ```bash
