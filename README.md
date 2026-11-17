@@ -23,19 +23,20 @@ Install this repository https://github.com/MarioSQuilantan/harness-factory in th
 When that prompt is used, read this section before any install command. Show **one question per screen**. Do not group questions in one form. After the person answers, wait until they press Next, then show the next question. Every question must include one option marked **Recommended**. A recommendation is not an answer: do not run onboard until they pick or confirm each one.
 
 1. First question, single choice: "Which language do you speak?" English, Spanish, Portuguese, French, or another they type. **Recommended:** the language of this chat. Ask every later question, and write every reply, in the language they choose.
-2. Multi-select, not one letter: "Which tools do you use to code here? Select every one you use." Cursor, Claude Code, Codex, Copilot, Gemini, OpenCode, Junie, Kiro, Windsurf, Cline, Roo Code, Continue, Antigravity, Zed, Amp, DeepSeek, Pi, Jules, Aider. **Recommended:** the app this chat is running in, pre-checked; they may add others. Map the chosen ones to `--target` separated by commas (`cursor,claude`).
+2. How should instructions be written: technical, with analogies, or a mix? → `technical` | `non-technical` | `mixed`. **Recommended:** `mixed`.
 3. What are you building? App or web | operations | research | content | mixed. → `software` | `operations` | `research` | `content` | `mixed`. **Recommended:** `software` when the repo is an app; otherwise the closest match, still shown as a choice.
-4. If it is software: small, growing, or complex? → `small` | `growing` | `complex`. **Recommended:** `small` for a new or single-purpose app.
-5. If it is software: straight to main, or branches and PRs? → `main` | `branches`. **Recommended:** `main`.
-6. How should instructions be written: technical, with analogies, or a mix? → `technical` | `non-technical` | `mixed`. **Recommended:** `mixed`.
-7. In one sentence, what is this project for? **Recommended:** one sentence drafted from the project, shown for them to accept or replace. Copy the sentence they confirm exactly. Both onboard steps use that same sentence.
+4. If it is software or mixed: small, growing, or complex? → `small` | `growing` | `complex`. **Recommended:** `small` for a new or single-purpose app.
+5. If it is software or mixed: straight to main, or branches and PRs? → `main` | `branches`. **Recommended:** `main`.
+6. In one sentence, what is this project for? **Recommended:** one sentence drafted from the project, shown for them to accept or replace. Copy the sentence they confirm exactly. Both onboard steps use that same sentence.
+7. Emoji in replies, commits, and harness messages? Yes or no. → `on` | `off`. **Recommended:** Yes, unless this project already has emoji off.
+8. Multi-select, not one letter: "Which tools do you use to code here? Select every one you use." Cursor, Claude Code, Codex, Copilot, Gemini, OpenCode, Junie, Kiro, Windsurf, Cline, Roo Code, Continue, Antigravity, Zed, Amp, DeepSeek, Pi, Jules, Aider. **Recommended:** the app this chat is running in, pre-checked; they may add others. Map the chosen ones to `--target` separated by commas (`cursor,claude`).
 
 Summarize the answers in 3 lines and wait for a yes. Then, from the project root, with Node >= 22.6:
 
 ```bash
 HF="npx --yes git+https://github.com/MarioSQuilantan/harness-factory.git"
 $HF catalog refresh
-$HF onboard --technical-level <…> --project-kind <…> --goal "<same sentence>" --target <id,id> [--software-scope <…> --workflow <…>]
+$HF onboard --technical-level <…> --project-kind <…> --goal "<same sentence>" --emoji <on|off> --target <id,id> [--software-scope <…> --workflow <…>]
 # copy "Plan id:", then repeat the same command with --accept-plan <id>
 $HF catalog suggest
 # Ask which skills to install and wait for the answer before the next command.
@@ -106,7 +107,7 @@ $HF catalog add <id> --install
 $HF add <id>
 ```
 
-The essential skills are already installed. A local skill in `skills/<id>/SKILL.md` wins over the shipped skill and over the registry skill with the same id. A flagged skill is not installed until you accept it.
+Every install includes the essential skills. A local skill in `skills/<id>/SKILL.md` wins over the shipped skill and over the registry skill with the same id. A flagged skill is not installed until you accept it.
 
 ## Uninstall
 
@@ -120,7 +121,7 @@ $HF purge
 $HF purge --with-docs
 ```
 
-`purge` keeps `02-DOCS/wiki` unless you pass `--with-docs`. Do not commit the deletions if you only wanted the harness gone on this machine.
+`purge` keeps `02-DOCS/` unless you pass `--with-docs`. Do not commit the deletions if you only wanted the harness gone on this machine.
 
 ## License
 
