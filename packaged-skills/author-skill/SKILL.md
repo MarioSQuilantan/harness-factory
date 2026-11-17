@@ -99,7 +99,7 @@ Run in order. Each step gates the next.
 4. **Write the body** in the rsc voice (see below). Tag every code/example fence with a language. Add a checklist or decision table *only where the flow actually branches* — not as decoration. Add a short anti-patterns table.
 5. **Extract references** for anything long or branch-specific, and link each one inline.
 6. **Write the evals** — `cases.yaml` then `README.md`. → `references/eval-authoring.md`.
-7. **Wire it into the rsc plumbing** (`tags`, `recommends`, `npm run manifest`, and indexing any artifact in `02-DOCS/wiki/index.md` — the Knowledge map; root `CLAUDE.md` keeps only a short pointer). → `references/rsc-conventions.md`.
+7. **Wire it into the rsc plumbing** (`tags`, `recommends`, add the id to `DEFAULT_SKILL_FLOOR` only when every install should ship it, and index any artifact in `02-DOCS/wiki/index.md` — the Knowledge map; root `CLAUDE.md` keeps only a short pointer). → `references/rsc-conventions.md`.
 8. **Self-audit against the rubric** (below). Fix every miss or justify it.
 
 ## The rsc voice

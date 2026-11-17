@@ -25,8 +25,8 @@ should_trigger:
   - prompt: "Write the evals/cases.yaml for the skill I just drafted, with trigger and capability tests."
     why: "Eval authoring for a skill is squarely owned here (the should_trigger/should_not_trigger/route_to and capability rubric minimums) — a deliberately specific, non-obvious trigger."
 
-  - prompt: "Audit this skill against our best-practice rubric before I add it to the catalog and run npm run manifest."
-    why: "Combines the rubric audit and the rsc plumbing (tags, recommends, manifest) — both are author-skill responsibilities; this exercises the wiring + rubric surface."
+  - prompt: "Audit this skill against our best-practice rubric before I add it to the essential floor."
+    why: "Combines the rubric audit and the rsc plumbing (tags, recommends, DEFAULT_SKILL_FLOOR) — both are author-skill responsibilities; this exercises the wiring + rubric surface."
 
   - prompt: "The frontmatter on my skill won't parse and the description is over 1024 chars. Fix it."
     why: "A concrete description/frontmatter defect (valid YAML, <=1024) — the description recipe and the YAML/length verifier are author-skill's, not any stack skill's."
