@@ -1,7 +1,7 @@
 {
   "name": "harness-factory",
   "version": "0.1.0",
-  "description": "Harness Factory — rsc-style onboarding and wiring without an embedded skill catalog; BYO-first with optional autoskills registry.",
+  "description": "Harness Factory — onboarding and wiring. Essential skills ship with every install, a local skill wins, and the autoskills registry is opt-in.",
   "type": "module",
   "bin": {
     "harness-factory": "scripts/harness-factory.js",

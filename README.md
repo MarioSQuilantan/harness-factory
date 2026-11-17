@@ -1,6 +1,6 @@
 # Harness Factory
 
-A harness for the repository you code in. It ships no skill catalog: your skills live in `skills/<id>/SKILL.md`. Skills from the [autoskills](https://autoskills.sh/) registry install only after you accept them. Autoskills is **CC-BY-NC-4.0**.
+A harness for the repository you code in. Every install ships the essential skills. A skill you place at `skills/<id>/SKILL.md` wins over the shipped skill with the same id. Skills from the [autoskills](https://autoskills.sh/) registry install only after you accept them. Autoskills is **CC-BY-NC-4.0**.
 
 Requires **Node.js >= 22.6**. From your project root:
 
@@ -104,7 +104,7 @@ $HF catalog add <id> --install
 $HF add <id>
 ```
 
-A local skill in `skills/<id>/SKILL.md` wins over the registry skill with the same id. A flagged skill is not installed until you accept it.
+The essential skills are already installed. A local skill in `skills/<id>/SKILL.md` wins over the shipped skill and over the registry skill with the same id. A flagged skill is not installed until you accept it.
 
 ## Uninstall
 
