@@ -16,8 +16,6 @@
     "coverage": "c8 --reporter=text npm run test:ci"
   },
   "dependencies": {
-    "@iarna/toml": "^2.2.5",
-    "ajv": "^8.18.0",
     "autoskills": "^0.4.1"
   },
   "devDependencies": {

@@ -8,23 +8,22 @@ is the rsc plumbing.
 ## The layout (single source of truth)
 
 ```text
-skills/<id>/                    ← canonical source of truth; edit here, only here
+packaged-skills/<id>/           ← essential skills that ship with every install
   SKILL.md
   references/*.md
   evals/cases.yaml
   evals/README.md
   scripts/verify.sh             ← only if the skill has a checkable artifact
 
-manifest.json                   ← GENERATED catalog (build-manifest.js); never hand-edit
-schema/frontmatter.schema.json  ← ajv schema every SKILL.md frontmatter must satisfy
-scripts/build-manifest.js       ← skills/*/SKILL.md → manifest.json (+ --check / --validate)
+manifest.json                   ← stub; the live catalog is autoskills, not a generated index
+schema/frontmatter.schema.json  ← frontmatter shape a SKILL.md should satisfy
 scripts/eval-lint.sh            ← gates evals/cases.yaml minimums
 ```
 
-Rule: **`skills/<id>/` is the only place you edit.** There are no generated skill
-copies in the repo any more — the `rsc-universal` CLI copies skills into the
-target IDE at install time. `manifest.json` is generated; editing it by hand is a
-defect because the next `npm run manifest` overwrites it.
+Rule: **edit an essential skill under `packaged-skills/<id>/`.** Domain skills
+(Flutter, databases, marketing, deploy) are not vendored; they stay opt-in from
+the autoskills registry. `manifest.json` is a stub. Do not turn it back into a
+hand-written skill index.
 
 ## Frontmatter — the catalog contract
 
@@ -41,8 +40,8 @@ profiles: [core, full]           # optional: named-profile membership
 ```
 
 - `tags` drive the FTS recommender — pick the words a user would actually type.
-- `recommends` must reference **real skill ids**; `build-manifest.js --validate`
-  fails on a dangling id.
+- `recommends` must reference **real skill ids** that exist under `packaged-skills/`
+  or in the autoskills registry.
 - `profiles` is optional. `minimal` = the floor (`orient`, `suggest`, `unslop`, `ftd`, `harness`, `init`);
   `core` = the SDD workflow; `full` = everything. Most stack skills set `[full]`
   or omit it (they are installed on demand, not by profile).
@@ -60,24 +59,21 @@ always installed (the floor) and proposes installing any skill a task needs via
 
 ## Wiring steps for a new skill
 
-1. **Create `skills/<id>/SKILL.md`** with valid frontmatter including `tags` and
-   `recommends` (and `profiles` if it belongs to one).
+1. **Create `packaged-skills/<id>/SKILL.md`** with valid frontmatter including `tags` and
+   `recommends` (and `profiles` if it belongs to one). Add the id to
+   `DEFAULT_SKILL_FLOOR` in `scripts/lib/default-skill-floor.js` only when every
+   install should ship it. Domain skills are not added there.
 2. **Add reciprocal `recommends`** where it makes sense — if `nextjs` should
    suggest your new skill, add the id to `nextjs`'s `recommends`.
-3. **Regenerate the manifest:** `npm run manifest`.
-4. **Validate:** `npm run validate` (ajv frontmatter + recommends integrity) and
-   `npm run manifest:check` (manifest is not stale, counts match).
-5. **Run the eval gate:** `bash scripts/eval-lint.sh` — must PASS for the new skill.
-6. **Add an outcome label** in `scripts/lib/recommend.js` if the skill is a
+3. **Run the eval gate:** `bash scripts/eval-lint.sh` — must PASS for the new skill.
+4. **Add an outcome label** in `scripts/lib/recommend.js` if the skill is a
    user-facing outcome (so the plain-language wizard shows a human label, not the
    bare id). Internal workflow skills don't need one.
-7. **Update the README catalog** (and the harness `claude-md-template.md`
+5. **Update the README catalog** (and the harness `claude-md-template.md`
    Knowledge-map rows) if the skill introduces a new topic users should discover.
 
 ```bash
 # the gates, from repo root
-npm run validate        # frontmatter + recommends integrity
-npm run manifest:check  # manifest is current and count-accurate
 npm test                # unit + integration
 bash scripts/eval-lint.sh
 ```
