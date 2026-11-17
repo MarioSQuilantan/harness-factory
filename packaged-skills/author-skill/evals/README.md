@@ -51,16 +51,15 @@ What a WITH-skill answer should show that a baseline misses:
   target) pointing into `references/`, not an encyclopedia and not an orphaned references folder.
 - **evals authored** to the minimums, with `route_to` siblings that actually exist.
 - **No `verify.sh` on a process skill** — rigor comes from the capability eval.
-- **rsc wiring** named: `tags` + `recommends` frontmatter, `npm run manifest` regenerated,
-  `npm run validate` / `manifest:check` passing, `eval-lint.sh` passing.
+- **wiring** named: `tags` + `recommends` frontmatter, essential skills in `DEFAULT_SKILL_FLOOR`,
+  domain skills left to the autoskills registry.
 - **Original rsc voice** — no copied artifacts/phrasing from other skill ecosystems.
 
 ## Judging notes (honest caveats)
 
 - This is **LLM-as-judge / human-in-the-loop**, not deterministic. Use a consistent grader
   (same model + rubric) across A/B to keep the comparison fair.
-- `scripts/eval-lint.sh` deterministically checks only the *case-count minimums* of any
-  `cases.yaml` this skill produces; it does not judge prose quality — that is the human/LLM grade.
+- Count the eval lists yourself. The counts do not judge prose quality — that is the human grade.
 - Watch the key confusables: building a *product feature* (the SDD chain) and designing an
   *agent loop* (`building-agents`) are different artifacts than authoring a *skill*.
 - Re-run after any edit to `SKILL.md` or its `description`, since both axes are wording-sensitive.

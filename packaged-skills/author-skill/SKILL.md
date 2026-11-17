@@ -146,34 +146,20 @@ A skill ships only when every box is checked or a miss is consciously justified.
 - [ ] **Orient voice honored** — reads `technical_level` from the profile and picks the register; short sentences, every answer understandable on its own.
 - [ ] **Artifacts under `02-DOCS/wiki/`** and indexed in `02-DOCS/wiki/index.md` (the Knowledge map; root `CLAUDE.md` keeps only a short pointer), if the skill produces any.
 - [ ] **Concrete tooling delegated** to the stack skills rather than reinvented.
-- [ ] **evals present** — `cases.yaml` (≥5 `should_trigger` incl. non-obvious, ≥4 `should_not_trigger` each with a real-sibling `route_to`, ≥1 `capability` with a `must_include` rubric) + an honest `README.md`. `scripts/eval-lint.sh` passes — but it only checks presence and the counts (≥5/≥4/≥1) and that those keys are lists; the `route_to`-points-at-a-real-sibling, non-obvious phrasings, and `must_include` quality are yours to verify here, not the linter's.
+- [ ] **evals present** — `cases.yaml` (≥5 `should_trigger` incl. non-obvious, ≥4 `should_not_trigger` each with a real-sibling `route_to`, ≥1 `capability` with a `must_include` rubric) + an honest `README.md`. Count the lists yourself, and check that each `route_to` names a real sibling, `none`, or `external:<name>`.
 - [ ] **verify.sh** present iff the skill has a checkable artifact; process skills rely on evals.
 - [ ] **Every `must_include` item discriminates** — answerable by the scenario's task, plausibly caused by the skill and plausibly missed without it. An item *both* arms fail measures nothing and lowers the absolute; it has turned a real PASS into a FAIL here. → `references/eval-authoring.md`.
 - [ ] **Sibling links resolve** — every `../x/SKILL.md` points to a skill that exists.
-- [ ] **Wired** — `tags` + `recommends` set, `npm run manifest` re-run, and `npm run validate` / `npm run manifest:check` pass (manifest current, no dangling recommends).
+- [ ] **Wired** — `tags` + `recommends` set. An essential skill also goes in `DEFAULT_SKILL_FLOOR`. A domain skill stays out of the floor and is offered from the autoskills registry.
 
 Full rubric rationale and the rsc plumbing steps → `references/rsc-conventions.md`.
 
 ### Two ship gates: document AND behavior
 
-The rubric above scores the skill as a **document**. That is one of two gates — a skill ships
-only when **both** are green:
+The checklist above scores the skill as a **document**. A skill ships only when both gates are green:
 
-1. **Static** — the rubric above / `scripts/skill-rubric.md`, weighted score ≥ 8.5.
-2. **Behavioral** — `scripts/skill-behavior-rubric.md`: run the skill on its `capability`
-   scenarios **with and without** it loaded, blind-grade both outputs, require `absolute ≥ 8.5`
-   **and** `lift ≥ +1.0`. Run it:
-
-   ```bash
-   # 1) execute + grade — invoke the Workflow tool:
-   #      scriptPath: scripts/skill-behavior-eval.workflow.js   args: "<skill-id>"
-   #    save the returned object to /tmp/<skill>-raw.json
-   # 2) score + gate (exit 0 pass / 1 fail):
-   node scripts/skill-behavior-eval.js --score /tmp/<skill>-raw.json
-   ```
-
-   A failing `lift` means the body adds nothing a bare agent didn't already do — fix the body,
-   don't game the checklist.
+1. **Static** — the checklist above holds, including the eval counts and real `route_to` ids.
+2. **Behavioral** — run one `capability` scenario with the skill loaded and once without it. Keep the skill only when the loaded run follows a rule the unloaded run misses. If both runs do the same thing, the body adds nothing: fix the body, don't add checklist items.
 
 ## Anti-patterns
 

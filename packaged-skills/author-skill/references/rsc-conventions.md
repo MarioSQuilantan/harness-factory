@@ -17,7 +17,6 @@ packaged-skills/<id>/           ← essential skills that ship with every instal
 
 manifest.json                   ← stub; the live catalog is autoskills, not a generated index
 schema/frontmatter.schema.json  ← frontmatter shape a SKILL.md should satisfy
-scripts/eval-lint.sh            ← gates evals/cases.yaml minimums
 ```
 
 Rule: **edit an essential skill under `packaged-skills/<id>/`.** Domain skills
@@ -65,7 +64,7 @@ always installed (the floor) and proposes installing any skill a task needs via
    install should ship it. Domain skills are not added there.
 2. **Add reciprocal `recommends`** where it makes sense — if `nextjs` should
    suggest your new skill, add the id to `nextjs`'s `recommends`.
-3. **Run the eval gate:** `bash scripts/eval-lint.sh` — must PASS for the new skill.
+3. **Check the evals by hand:** ≥5 `should_trigger`, ≥4 `should_not_trigger` with a real `route_to`, ≥1 `capability`.
 4. **Add an outcome label** in `scripts/lib/recommend.js` if the skill is a
    user-facing outcome (so the plain-language wizard shows a human label, not the
    bare id). Internal workflow skills don't need one.
@@ -73,9 +72,8 @@ always installed (the floor) and proposes installing any skill a task needs via
    Knowledge-map rows) if the skill introduces a new topic users should discover.
 
 ```bash
-# the gates, from repo root
-npm test                # unit + integration
-bash scripts/eval-lint.sh
+# the gate, from repo root
+npm test
 ```
 
 ## The Knowledge map
