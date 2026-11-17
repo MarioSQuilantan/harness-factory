@@ -14,6 +14,7 @@ import {
 import { DOMAINS } from '../scripts/lib/domains.js';
 import { writeLocalSkill } from './helpers/local-skill-fixture.js';
 import { listCatalogSkillIds } from '../scripts/lib/catalog-registry.js';
+import { DEFAULT_SKILL_FLOOR } from '../scripts/lib/default-skill-floor.js';
 
 const REPO = join(dirname(fileURLToPath(import.meta.url)), '..');
 
@@ -29,7 +30,7 @@ test('declared install ids union local skills and catalog opt-in only', () => {
     catalog: { provider: 'autoskills', selected: ['vitest'], dismissed: [] },
     skillsPolicy: 'byo-first',
   });
-  assert.deepEqual(declaredInstallSkillIds(cwd), ['my-skill', 'vitest']);
+  assert.deepEqual(declaredInstallSkillIds(cwd), [...DEFAULT_SKILL_FLOOR, 'my-skill', 'vitest']);
 });
 
 test('local-only profile ignores catalog selections', () => {
@@ -40,7 +41,7 @@ test('local-only profile ignores catalog selections', () => {
     skills: ['alpha', 'vitest'],
     catalog: { provider: 'autoskills', selected: ['vitest'], dismissed: [] },
   });
-  assert.deepEqual(localOnlyInstallSkillIds(cwd), ['alpha']);
+  assert.deepEqual(localOnlyInstallSkillIds(cwd), [...DEFAULT_SKILL_FLOOR, 'alpha']);
 });
 
 test('policyForProjectInstall preserves onboarding receipt policy', () => {

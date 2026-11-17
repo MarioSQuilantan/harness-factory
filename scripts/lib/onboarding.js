@@ -9,6 +9,7 @@ import { suggestCatalogSkills } from './catalog-registry.js';
 import { detectLocalSkills } from './local-skills.js';
 import { readCatalogPolicy } from './catalog-manifest.js';
 import { replaceRetired } from './retired-skills.js';
+import { DEFAULT_SKILL_FLOOR } from './default-skill-floor.js';
 import { managedPathsForInstall } from '../install-apply.js';
 
 export const ONBOARDING_SCHEMA_VERSION = 1;
@@ -240,6 +241,7 @@ export function buildOnboardingPlan(record, evidence) {
   const catalogSelected = new Set(manifest?.catalog?.selected || []);
   const declared = replaceRetired(manifest?.skills ?? []);
   const skills = [...new Set([
+    ...DEFAULT_SKILL_FLOOR,
     ...localSkills,
     ...declared.filter((id) => manifest?.ownSkills?.includes(id) || catalogSelected.has(id) || localSkills.includes(id)),
     ...catalogSelected,
@@ -280,6 +282,7 @@ export function buildOnboardingPlan(record, evidence) {
     }
   }
   for (const id of skills) {
+    if (id === 'asdd') continue;
     if (localSkills.includes(id) || suggested.some((r) => r.id === id)) continue;
     decisions.push(selected(id, 'skill', 'Declared or accepted for this harness.', 'manifest-declaration'));
   }

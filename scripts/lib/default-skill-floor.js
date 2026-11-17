@@ -30,9 +30,15 @@
 // `security-audit` joined in the next release, in place of the two security skills it retired (see
 // retired-skills.js): it audits the code and the project's platforms, and a security audit request
 // must work in any project the first time it is asked. Only its description is paid for on other turns.
-// Harness Factory: no vendor skill floor; skills come from BYO or autoskills opt-in.
-export const DEFAULT_SKILL_FLOOR = Object.freeze([]);
+// Essential skills copied from rsc-harness (MIT). Domain skills (Flutter, databases,
+// marketing, deploy) stay out. Every install equips this set from packaged-skills/.
+export const DEFAULT_SKILL_FLOOR = Object.freeze([
+  'analyze', 'asdd', 'author-skill', 'clarify', 'connect-tool', 'constitution', 'debug',
+  'decision-challenge', 'design', 'ftd', 'harness', 'idea-refinement', 'implement', 'init',
+  'orient', 'plan', 'review', 'sdd-init', 'security-audit', 'ship', 'simplify-code',
+  'source-grounded-development', 'specify', 'suggest', 'tasks', 'tidy', 'unslop', 'ux', 'verify',
+]);
 
 export function withDefaultSkillFloor(skillIds = []) {
-  return [...new Set([...skillIds])];
+  return [...new Set([...DEFAULT_SKILL_FLOOR, ...skillIds])];
 }

@@ -67,7 +67,9 @@ test('small software defers SDD with observable triggers; growing software selec
 
   const growing = buildOnboardingPlan(normalizeOnboarding(answers({ softwareScope: 'growing' })), evidence);
   assert.equal(growing.decisions.find((d) => d.id === 'asdd').state, 'selected');
-  assert.ok(!growing.policy.skills.includes('specify'), 'catalog skills are not auto-installed');
+  assert.ok(growing.policy.skills.includes('specify'), 'the SDD chain ships with the harness');
+  assert.ok(growing.policy.skills.includes('orient'));
+  assert.ok(growing.policy.skills.includes('ftd'));
   assert.deepEqual(growing.policy.agents.slice(0, 5).sort(), ['developer', 'finding-verifier', 'refuter-correctness', 'refuter-security', 'refuter-tests'].sort());
   assert.ok(growing.decisions.some((d) => d.id === 'developer' && d.state === 'selected'));
   assert.ok(growing.decisions.some((d) => d.id === 'memory' && d.state === 'selected'));
@@ -90,8 +92,9 @@ test('operations gets the whole harness, and none of the machinery that only mak
   assert.equal(plan.policy.codeHooks, false);
   assert.equal(plan.policy.gitmojiGuard, false);
   assert.deepEqual(plan.policy.agents, []);
-  assert.ok(!plan.policy.skills.includes('asdd'), 'asdd is a workflow decision, not an auto-installed skill');
-  assert.ok(!plan.policy.skills.includes('ftd'), 'harness lane skills require catalog opt-in');
+  assert.ok(plan.policy.skills.includes('asdd'), 'the asdd skill ships even when the practice is deferred');
+  assert.ok(plan.policy.skills.includes('ftd'));
+  assert.ok(plan.policy.skills.includes('suggest'));
   assert.equal(plan.decisions.find((d) => d.id === 'asdd').state, 'deferred',
     'installed, but not practised here — which is what `reassess` watches');
 });

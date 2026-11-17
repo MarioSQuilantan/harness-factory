@@ -28,6 +28,7 @@
     "targets",
     "schema",
     "manifest.json",
+    "packaged-skills",
     "!**/__pycache__/**",
     "!**/*.pyc"
   ],

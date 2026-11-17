@@ -73,9 +73,12 @@ async function ensureBase(id, cwd, baseVersions) {
     const manifest = readManifest(cwd);
     const catalogSelected = new Set(manifest?.catalog?.selected || []);
     const fromProject = join(cwd, 'skills', id);
+    const packaged = join(ROOT, 'packaged-skills', id);
     const localSrc = localSkillSourceDir(id, cwd);
     if (existsSync(fromProject) && localSrc) {
       cpSync(localSrc, dest, { recursive: true });
+    } else if (existsSync(packaged)) {
+      cpSync(packaged, dest, { recursive: true });
     } else if (existsSync(join(ROOT, 'skills', id))) {
       cpSync(join(ROOT, 'skills', id), dest, { recursive: true });
     } else if (catalogSelected.has(id) || ((manifest?.skills || []).includes(id) && catalogSkillKnown(id))) {
