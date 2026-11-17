@@ -69,6 +69,8 @@ $HF install --target claude
 $HF sync --target claude
 ```
 
+These commands write the harness into that app: skills, hooks, and subagents. Editor plugins stay on their own install. The Flutter plugin is [Flutter Clean Architecture](https://github.com/MarioSQuilantan/agent-plugins); follow its Installation section, then reload the app.
+
 Several at once: `--target claude,codex`. Reload that app afterward.
 
 | Id | Tool | Where it writes | Subagents |
