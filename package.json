@@ -12,7 +12,7 @@
   },
   "scripts": {
     "test": "npm run test:ci",
-    "test:ci": "node --test tests/harness-factory-catalog.test.js tests/detect-repo.test.js tests/default-skill-floor.test.js tests/harness-factory-manifest.test.js tests/harness-factory-wizard.test.js tests/harness-factory-add-consult.test.js tests/catalog-install-prompt.test.js tests/install-log.test.js tests/install-repairs.test.js tests/uninstall-wizard.test.js tests/interview-copy.test.js tests/harness-status.test.js tests/manifest-file.test.js tests/onboarding.test.js tests/local-cli-instructions.test.js",
+    "test:ci": "node --test tests/harness-factory-catalog.test.js tests/detect-repo.test.js tests/default-skill-floor.test.js tests/harness-factory-manifest.test.js tests/harness-factory-wizard.test.js tests/harness-factory-add-consult.test.js tests/catalog-install-prompt.test.js tests/install-log.test.js tests/install-repairs.test.js tests/uninstall-wizard.test.js tests/interview-copy.test.js tests/harness-status.test.js tests/manifest-file.test.js tests/onboarding.test.js tests/local-cli-instructions.test.js tests/skill-registry.test.js",
     "coverage": "c8 --reporter=text npm run test:ci"
   },
   "dependencies": {

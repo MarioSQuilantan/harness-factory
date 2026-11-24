@@ -668,6 +668,16 @@ export async function uninstall({ skillIds = [], agentIds = [], target, home, cw
 // Reconcile an accepted onboarding plan as a replacement, not an additive install.
 // Ownership comes only from the target state file; unrelated files in the assistant
 // directory are left untouched.
+// An id this installer is allowed to remove: it shipped in the package, the project
+// brought it, or the person accepted it from autoskills. Anything else in the state
+// file is not ours to delete.
+function installableSkillId(id, cwd) {
+  return existsSync(join(ROOT, 'packaged-skills', id, 'SKILL.md'))
+    || existsSync(join(ROOT, 'skills', id, 'SKILL.md'))
+    || existsSync(join(cwd, 'skills', id, 'SKILL.md'))
+    || catalogSkillKnown(id);
+}
+
 export function removeTargetInstall({ target, home, cwd = process.cwd() }) {
   const paths = targetPaths(target, home, cwd);
   const state = readState(paths.stateFile);
@@ -683,7 +693,7 @@ export function removeTargetInstall({ target, home, cwd = process.cwd() }) {
     /^[a-z0-9][a-z0-9._-]*$/i.test(id)
     // A retired id no longer has a catalog directory, but `paths.skillDir` below still proves where
     // it lives — refusing it made every re-onboard that drops an old assistant loop on recovery.
-    && (existsSync(join(ROOT, 'skills', id)) || isRetired(id))
+    && (installableSkillId(id, cwd) || isRetired(id))
     && (entry.files || []).every((file) => resolve(file) === resolve(paths.skillDir(id))))
     && (state.agents || []).every((name) => {
       if (!allAgentNames().includes(name)) return false;

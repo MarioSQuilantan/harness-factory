@@ -1375,7 +1375,7 @@ async function main() {
       const sub = argv[1];
       if (sub === 'refresh') {
         const registry = refreshRegistry({ target });
-        say(`✅ Registry updated: .rsc/skill-registry.md (${registry.counts.skills} skills)`);
+        say(`✅ Registry updated: .rsc/skill-registry.json and .rsc/skill-registry.md (${registry.counts.skills} skills, ${registry.counts.available} with a file)`);
         return;
       }
       if (sub === 'status') {
